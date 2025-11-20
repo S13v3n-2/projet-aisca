@@ -1,0 +1,7 @@
+streamlit
+sentence-transformers
+google-generativeai
+pandas
+numpy
+matplotlib
+plotly
