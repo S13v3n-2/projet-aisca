@@ -1,0 +1,1023 @@
+{
+  "blocs": [
+    {
+      "id": "B01",
+      "nom": "Juridique",
+      "description": "Compétences en droit, conformité et réglementation",
+      "competences": [
+        {
+          "id": "C001",
+          "texte": "Analyser et interpréter des contrats et textes juridiques complexes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C002",
+          "texte": "Maîtriser le droit des affaires et le droit commercial",
+          "niveau": "technique"
+        },
+        {
+          "id": "C003",
+          "texte": "Rédiger des actes juridiques et documents légaux professionnels",
+          "niveau": "technique"
+        },
+        {
+          "id": "C004",
+          "texte": "Assurer la conformité réglementaire et le respect des normes RGPD",
+          "niveau": "technique"
+        },
+        {
+          "id": "C005",
+          "texte": "Maîtriser le droit du travail et les relations sociales en entreprise",
+          "niveau": "technique"
+        },
+        {
+          "id": "C006",
+          "texte": "Effectuer une veille réglementaire et juridique continue",
+          "niveau": "technique"
+        },
+        {
+          "id": "C007",
+          "texte": "Gérer les procédures juridiques et le contentieux",
+          "niveau": "technique"
+        },
+        {
+          "id": "C008",
+          "texte": "Protéger la propriété intellectuelle et les brevets",
+          "niveau": "technique"
+        },
+        {
+          "id": "C009",
+          "texte": "Aimer débattre et argumenter de manière structurée",
+          "niveau": "general"
+        },
+        {
+          "id": "C010",
+          "texte": "Être rigoureux et attentif aux moindres détails",
+          "niveau": "general"
+        },
+        {
+          "id": "C011",
+          "texte": "Avoir un esprit d'analyse pour décortiquer des problèmes complexes",
+          "niveau": "general"
+        },
+        {
+          "id": "C012",
+          "texte": "S'intéresser à l'actualité politique et juridique",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B02",
+      "nom": "Business et Stratégie",
+      "description": "Compétences en stratégie d'entreprise et gestion de projets",
+      "competences": [
+        {
+          "id": "C013",
+          "texte": "Réaliser une analyse de marché et identifier les opportunités business",
+          "niveau": "technique"
+        },
+        {
+          "id": "C014",
+          "texte": "Élaborer un business plan complet et convaincant",
+          "niveau": "technique"
+        },
+        {
+          "id": "C015",
+          "texte": "Définir et piloter la stratégie d'entreprise à moyen et long terme",
+          "niveau": "technique"
+        },
+        {
+          "id": "C016",
+          "texte": "Gérer des projets complexes avec méthodes agiles ou classiques",
+          "niveau": "technique"
+        },
+        {
+          "id": "C017",
+          "texte": "Conduire une analyse concurrentielle et benchmark de marché",
+          "niveau": "technique"
+        },
+        {
+          "id": "C018",
+          "texte": "Concevoir et valider des business models innovants",
+          "niveau": "technique"
+        },
+        {
+          "id": "C019",
+          "texte": "Réaliser des études de faisabilité technique et financière",
+          "niveau": "technique"
+        },
+        {
+          "id": "C020",
+          "texte": "Piloter le changement et accompagner les transformations organisationnelles",
+          "niveau": "technique"
+        },
+        {
+          "id": "C021",
+          "texte": "Avoir un esprit de leadership et savoir motiver une équipe",
+          "niveau": "general"
+        },
+        {
+          "id": "C022",
+          "texte": "Faire preuve d'esprit entrepreneurial et d'initiative",
+          "niveau": "general"
+        },
+        {
+          "id": "C023",
+          "texte": "Résoudre des problèmes complexes avec créativité",
+          "niveau": "general"
+        },
+        {
+          "id": "C024",
+          "texte": "Avoir une vision globale et savoir anticiper les tendances",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B03",
+      "nom": "Marketing et Vente",
+      "description": "Compétences en marketing, communication commerciale et vente",
+      "competences": [
+        {
+          "id": "C025",
+          "texte": "Maîtriser les techniques de marketing digital et e-commerce",
+          "niveau": "technique"
+        },
+        {
+          "id": "C026",
+          "texte": "Conduire des études de marché qualitatives et quantitatives",
+          "niveau": "technique"
+        },
+        {
+          "id": "C027",
+          "texte": "Gérer la relation client avec des outils CRM performants",
+          "niveau": "technique"
+        },
+        {
+          "id": "C028",
+          "texte": "Appliquer des techniques de vente et de closing efficaces",
+          "niveau": "technique"
+        },
+        {
+          "id": "C029",
+          "texte": "Construire une stratégie de branding et de positionnement de marque",
+          "niveau": "technique"
+        },
+        {
+          "id": "C030",
+          "texte": "Élaborer un marketing mix adapté (produit, prix, distribution, communication)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C031",
+          "texte": "Prospecter de nouveaux clients et développer un portefeuille commercial",
+          "niveau": "technique"
+        },
+        {
+          "id": "C032",
+          "texte": "Négocier des contrats commerciaux et conclure des ventes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C033",
+          "texte": "Avoir un talent de persuasion et savoir convaincre",
+          "niveau": "general"
+        },
+        {
+          "id": "C034",
+          "texte": "Faire preuve de créativité dans les approches commerciales",
+          "niveau": "general"
+        },
+        {
+          "id": "C035",
+          "texte": "Développer son empathie pour comprendre les besoins clients",
+          "niveau": "general"
+        },
+        {
+          "id": "C036",
+          "texte": "Avoir le sens du commerce et l'aisance relationnelle",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B04",
+      "nom": "Finance et Comptabilité",
+      "description": "Compétences en gestion financière, comptabilité et contrôle de gestion",
+      "competences": [
+        {
+          "id": "C037",
+          "texte": "Réaliser des analyses financières approfondies et diagnostics économiques",
+          "niveau": "technique"
+        },
+        {
+          "id": "C038",
+          "texte": "Maîtriser la comptabilité générale et analytique en normes françaises et IFRS",
+          "niveau": "technique"
+        },
+        {
+          "id": "C039",
+          "texte": "Élaborer et suivre les budgets prévisionnels et contrôler les écarts",
+          "niveau": "technique"
+        },
+        {
+          "id": "C040",
+          "texte": "Évaluer la rentabilité des investissements et optimiser l'allocation de capital",
+          "niveau": "technique"
+        },
+        {
+          "id": "C041",
+          "texte": "Créer et analyser des tableaux de bord financiers pour le pilotage",
+          "niveau": "technique"
+        },
+        {
+          "id": "C042",
+          "texte": "Effectuer la consolidation comptable de groupes d'entreprises",
+          "niveau": "technique"
+        },
+        {
+          "id": "C043",
+          "texte": "Réaliser des audits financiers et contrôler les procédures internes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C044",
+          "texte": "Gérer la trésorerie et optimiser les flux financiers",
+          "niveau": "technique"
+        },
+        {
+          "id": "C045",
+          "texte": "Avoir une grande rigueur dans le traitement des chiffres",
+          "niveau": "general"
+        },
+        {
+          "id": "C046",
+          "texte": "Développer sa logique et son raisonnement analytique",
+          "niveau": "general"
+        },
+        {
+          "id": "C047",
+          "texte": "Aimer travailler avec les chiffres et les données quantitatives",
+          "niveau": "general"
+        },
+        {
+          "id": "C048",
+          "texte": "Être organisé et précis dans son travail quotidien",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B05",
+      "nom": "Communication et Médias",
+      "description": "Compétences en communication d'entreprise, relations publiques et médias",
+      "competences": [
+        {
+          "id": "C049",
+          "texte": "Élaborer une stratégie de communication corporate cohérente",
+          "niveau": "technique"
+        },
+        {
+          "id": "C050",
+          "texte": "Gérer les relations publiques et les relations avec la presse",
+          "niveau": "technique"
+        },
+        {
+          "id": "C051",
+          "texte": "Maîtriser le storytelling et la narration pour captiver les audiences",
+          "niveau": "technique"
+        },
+        {
+          "id": "C052",
+          "texte": "Gérer les situations de crise médiatique et protéger la réputation",
+          "niveau": "technique"
+        },
+        {
+          "id": "C053",
+          "texte": "Définir et déployer une stratégie de communication interne et externe",
+          "niveau": "technique"
+        },
+        {
+          "id": "C054",
+          "texte": "Organiser et gérer des événements professionnels et grand public",
+          "niveau": "technique"
+        },
+        {
+          "id": "C055",
+          "texte": "Développer et entretenir un réseau de contacts médias",
+          "niveau": "technique"
+        },
+        {
+          "id": "C056",
+          "texte": "Rédiger des communiqués de presse et dossiers de presse impactants",
+          "niveau": "technique"
+        },
+        {
+          "id": "C057",
+          "texte": "Avoir une grande aisance à l'oral et en présentation publique",
+          "niveau": "general"
+        },
+        {
+          "id": "C058",
+          "texte": "Posséder une excellente qualité rédactionnelle et syntaxe",
+          "niveau": "general"
+        },
+        {
+          "id": "C059",
+          "texte": "Faire preuve de curiosité pour l'actualité et les médias",
+          "niveau": "general"
+        },
+        {
+          "id": "C060",
+          "texte": "Avoir le sens du contact et de l'empathie dans les relations",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B06",
+      "nom": "Création et Design",
+      "description": "Compétences en design graphique, direction artistique et création visuelle",
+      "competences": [
+        {
+          "id": "C061",
+          "texte": "Créer des designs graphiques professionnels et esthétiques",
+          "niveau": "technique"
+        },
+        {
+          "id": "C062",
+          "texte": "Concevoir une identité visuelle complète et une charte graphique",
+          "niveau": "technique"
+        },
+        {
+          "id": "C063",
+          "texte": "Développer des créations publicitaires impactantes et mémorables",
+          "niveau": "technique"
+        },
+        {
+          "id": "C064",
+          "texte": "Maîtriser la suite Adobe (Photoshop, Illustrator, InDesign)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C065",
+          "texte": "Assurer la direction artistique de projets créatifs complexes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C066",
+          "texte": "Réaliser des mises en page sophistiquées pour print et digital",
+          "niveau": "technique"
+        },
+        {
+          "id": "C067",
+          "texte": "Maîtriser la typographie et la hiérarchie visuelle",
+          "niveau": "technique"
+        },
+        {
+          "id": "C068",
+          "texte": "Créer des illustrations et pictos originaux",
+          "niveau": "technique"
+        },
+        {
+          "id": "C069",
+          "texte": "Faire preuve de créativité et d'imagination dans ses créations",
+          "niveau": "general"
+        },
+        {
+          "id": "C070",
+          "texte": "Développer son sens esthétique et son œil artistique",
+          "niveau": "general"
+        },
+        {
+          "id": "C071",
+          "texte": "Pratiquer le dessin ou d'autres formes d'art visuel",
+          "niveau": "general"
+        },
+        {
+          "id": "C072",
+          "texte": "S'intéresser aux arts visuels, expositions et design",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B07",
+      "nom": "Digital et Réseaux Sociaux",
+      "description": "Compétences en marketing digital, social media et stratégie en ligne",
+      "competences": [
+        {
+          "id": "C073",
+          "texte": "Gérer des communautés en ligne et animer les réseaux sociaux",
+          "niveau": "technique"
+        },
+        {
+          "id": "C074",
+          "texte": "Créer du contenu digital engageant (vidéos, posts, stories)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C075",
+          "texte": "Analyser les performances avec Meta Business Suite et Google Analytics",
+          "niveau": "technique"
+        },
+        {
+          "id": "C076",
+          "texte": "Développer des stratégies d'influence marketing et partenariats créateurs",
+          "niveau": "technique"
+        },
+        {
+          "id": "C077",
+          "texte": "Optimiser le référencement naturel SEO et payant SEA",
+          "niveau": "technique"
+        },
+        {
+          "id": "C078",
+          "texte": "Élaborer et déployer une stratégie social media multi-plateformes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C079",
+          "texte": "Gérer des campagnes de publicité en ligne (Facebook Ads, Google Ads)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C080",
+          "texte": "Effectuer une veille digitale et identifier les tendances émergentes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C081",
+          "texte": "Posséder une forte culture digitale et connaître les plateformes",
+          "niveau": "general"
+        },
+        {
+          "id": "C082",
+          "texte": "Faire preuve de créativité numérique dans la production de contenu",
+          "niveau": "general"
+        },
+        {
+          "id": "C083",
+          "texte": "Être curieux des nouvelles tendances et innovations digitales",
+          "niveau": "general"
+        },
+        {
+          "id": "C084",
+          "texte": "Avoir une présence en ligne active et authentique",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B08",
+      "nom": "Data Analysis",
+      "description": "Compétences en analyse de données, visualisation et statistiques",
+      "competences": [
+        {
+          "id": "C085",
+          "texte": "Programmer en Python ou R pour l'analyse de données",
+          "niveau": "technique"
+        },
+        {
+          "id": "C086",
+          "texte": "Créer des visualisations de données avec Matplotlib, Tableau ou Power BI",
+          "niveau": "technique"
+        },
+        {
+          "id": "C087",
+          "texte": "Appliquer des statistiques descriptives et inférentielles",
+          "niveau": "technique"
+        },
+        {
+          "id": "C088",
+          "texte": "Maîtriser SQL pour interroger et manipuler des bases de données",
+          "niveau": "technique"
+        },
+        {
+          "id": "C089",
+          "texte": "Nettoyer et préparer des données brutes pour l'analyse",
+          "niveau": "technique"
+        },
+        {
+          "id": "C090",
+          "texte": "Créer des dashboards interactifs pour le pilotage décisionnel",
+          "niveau": "technique"
+        },
+        {
+          "id": "C091",
+          "texte": "Réaliser des analyses exploratoires de données (EDA)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C092",
+          "texte": "Interpréter les résultats statistiques et communiquer les insights",
+          "niveau": "technique"
+        },
+        {
+          "id": "C093",
+          "texte": "Avoir une logique et un raisonnement analytique développés",
+          "niveau": "general"
+        },
+        {
+          "id": "C094",
+          "texte": "Faire preuve de curiosité scientifique et investigatrice",
+          "niveau": "general"
+        },
+        {
+          "id": "C095",
+          "texte": "Aimer travailler avec les chiffres et les données",
+          "niveau": "general"
+        },
+        {
+          "id": "C096",
+          "texte": "Résoudre des énigmes logiques et des problèmes complexes",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B09",
+      "nom": "Machine Learning et IA",
+      "description": "Compétences en intelligence artificielle, apprentissage automatique et deep learning",
+      "competences": [
+        {
+          "id": "C097",
+          "texte": "Développer et entraîner des algorithmes de machine learning supervisé et non supervisé",
+          "niveau": "technique"
+        },
+        {
+          "id": "C098",
+          "texte": "Concevoir des réseaux de neurones profonds pour le deep learning",
+          "niveau": "technique"
+        },
+        {
+          "id": "C099",
+          "texte": "Implémenter des modèles de traitement du langage naturel (NLP)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C100",
+          "texte": "Construire des modèles prédictifs pour la classification et la régression",
+          "niveau": "technique"
+        },
+        {
+          "id": "C101",
+          "texte": "Maîtriser les frameworks TensorFlow, PyTorch et scikit-learn",
+          "niveau": "technique"
+        },
+        {
+          "id": "C102",
+          "texte": "Développer des solutions de computer vision et reconnaissance d'images",
+          "niveau": "technique"
+        },
+        {
+          "id": "C103",
+          "texte": "Déployer des modèles d'IA en production avec MLOps",
+          "niveau": "technique"
+        },
+        {
+          "id": "C104",
+          "texte": "Optimiser les hyperparamètres et évaluer les performances des modèles",
+          "niveau": "technique"
+        },
+        {
+          "id": "C105",
+          "texte": "Posséder de solides bases en mathématiques avancées (algèbre, calcul)",
+          "niveau": "general"
+        },
+        {
+          "id": "C106",
+          "texte": "Maîtriser l'algorithmique et la complexité computationnelle",
+          "niveau": "general"
+        },
+        {
+          "id": "C107",
+          "texte": "Être passionné par l'innovation technologique et l'IA",
+          "niveau": "general"
+        },
+        {
+          "id": "C108",
+          "texte": "Avoir un esprit de recherche et d'expérimentation scientifique",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B10",
+      "nom": "Développement et Infrastructure",
+      "description": "Compétences en développement logiciel, DevOps et architecture cloud",
+      "competences": [
+        {
+          "id": "C109",
+          "texte": "Programmer en Python, Java ou JavaScript avec bonnes pratiques",
+          "niveau": "technique"
+        },
+        {
+          "id": "C110",
+          "texte": "Développer des API REST robustes et scalables",
+          "niveau": "technique"
+        },
+        {
+          "id": "C111",
+          "texte": "Concevoir et gérer des bases de données relationnelles (PostgreSQL, MySQL) et NoSQL (MongoDB)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C112",
+          "texte": "Implémenter des pipelines DevOps avec CI/CD (Jenkins, GitLab CI)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C113",
+          "texte": "Déployer et gérer des infrastructures cloud (AWS, Azure, GCP)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C114",
+          "texte": "Maîtriser Git pour le versioning et la collaboration en équipe",
+          "niveau": "technique"
+        },
+        {
+          "id": "C115",
+          "texte": "Utiliser la conteneurisation avec Docker et l'orchestration avec Kubernetes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C116",
+          "texte": "Implémenter des mesures de cybersécurité et protection des systèmes",
+          "niveau": "technique"
+        },
+        {
+          "id": "C117",
+          "texte": "Développer sa logique de programmation et sa pensée algorithmique",
+          "niveau": "general"
+        },
+        {
+          "id": "C118",
+          "texte": "Avoir de la patience pour résoudre des bugs et déboguer du code",
+          "niveau": "general"
+        },
+        {
+          "id": "C119",
+          "texte": "Aimer construire des systèmes et voir ses créations fonctionner",
+          "niveau": "general"
+        },
+        {
+          "id": "C120",
+          "texte": "Posséder un esprit logique et méthodique dans le travail",
+          "niveau": "general"
+        }
+      ]
+    },
+    {
+      "id": "B11",
+      "nom": "Ingénierie et Technique",
+      "description": "Compétences en ingénierie mécanique, énergétique et systèmes techniques",
+      "competences": [
+        {
+          "id": "C121",
+          "texte": "Concevoir des systèmes mécaniques complexes et innovants",
+          "niveau": "technique"
+        },
+        {
+          "id": "C122",
+          "texte": "Appliquer les principes de thermodynamique et énergétique",
+          "niveau": "technique"
+        },
+        {
+          "id": "C123",
+          "texte": "Maîtriser l'électronique et l'électrotechnique industrielle",
+          "niveau": "technique"
+        },
+        {
+          "id": "C124",
+          "texte": "Utiliser les logiciels de CAO/DAO (AutoCAD, SolidWorks, CATIA)",
+          "niveau": "technique"
+        },
+        {
+          "id": "C125",
+          "texte": "Développer et programmer des systèmes embarqués",
+          "niveau": "technique"
+        },
+        {
+          "id": "C126",
+          "texte": "Appliquer les normes techniques, sécurité et qualité industrielles",
+          "niveau": "technique"
+        },
+        {
+          "id": "C127",
+          "texte": "Gérer des projets industriels complexes et pluridisciplinaires",
+          "niveau": "technique"
+        },
+        {
+          "id": "C128",
+          "texte": "Automatiser des processus industriels et optimiser la production",
+          "niveau": "technique"
+        },
+        {
+          "id": "C129",
+          "texte": "S'intéresser à la physique et ses applications pratiques",
+          "niveau": "general"
+        },
+        {
+          "id": "C130",
+          "texte": "Comprendre la mécanique et les principes d'ingénierie",
+          "niveau": "general"
+        },
+        {
+          "id": "C131",
+          "texte": "Avoir une curiosité technique pour comprendre le fonctionnement des objets",
+          "niveau": "general"
+        },
+        {
+          "id": "C132",
+          "texte": "Posséder un esprit pratique et aimer les travaux manuels techniques",
+          "niveau": "general"
+        }
+      ]
+    }
+  ],
+  "metiers": [
+    {
+      "id": "M01",
+      "titre": "Avocat d'affaires",
+      "description": "Conseille les entreprises sur les aspects juridiques et stratégiques de leurs opérations",
+      "blocs_requis": ["B01", "B02"],
+      "competences_cles": ["C001", "C002", "C003", "C009", "C013", "C015"]
+    },
+    {
+      "id": "M02",
+      "titre": "Juriste d'entreprise",
+      "description": "Assure la sécurité juridique des opérations commerciales et contractuelles",
+      "blocs_requis": ["B01", "B02"],
+      "competences_cles": ["C001", "C003", "C004", "C005", "C016", "C010"]
+    },
+    {
+      "id": "M03",
+      "titre": "Notaire",
+      "description": "Authentifie les actes juridiques et conseille en gestion patrimoniale",
+      "blocs_requis": ["B01", "B04"],
+      "competences_cles": ["C001", "C003", "C008", "C037", "C040", "C010"]
+    },
+    {
+      "id": "M04",
+      "titre": "Consultant en conformité RGPD",
+      "description": "Assure la conformité des données personnelles et des systèmes informatiques aux réglementations",
+      "blocs_requis": ["B01", "B10"],
+      "competences_cles": ["C004", "C006", "C116", "C111", "C010", "C011"]
+    },
+    {
+      "id": "M05",
+      "titre": "Responsable affaires réglementaires",
+      "description": "Veille au respect des réglementations dans les secteurs hautement régulés",
+      "blocs_requis": ["B01", "B02"],
+      "competences_cles": ["C004", "C006", "C007", "C015", "C016", "C012"]
+    },
+    {
+      "id": "M06",
+      "titre": "Consultant en stratégie",
+      "description": "Accompagne les entreprises dans leurs décisions stratégiques et transformations",
+      "blocs_requis": ["B02", "B04"],
+      "competences_cles": ["C013", "C015", "C017", "C037", "C021", "C024"]
+    },
+    {
+      "id": "M07",
+      "titre": "Chef de produit",
+      "description": "Pilote le développement et le lancement de produits du concept à la commercialisation",
+      "blocs_requis": ["B02", "B03"],
+      "competences_cles": ["C013", "C016", "C026", "C029", "C021", "C023"]
+    },
+    {
+      "id": "M08",
+      "titre": "Responsable développement commercial",
+      "description": "Développe le portefeuille clients et pilote la croissance du chiffre d'affaires",
+      "blocs_requis": ["B02", "B03"],
+      "competences_cles": ["C013", "C017", "C028", "C031", "C032", "C033"]
+    },
+    {
+      "id": "M09",
+      "titre": "Business Analyst",
+      "description": "Analyse les données pour éclairer les décisions stratégiques et opérationnelles",
+      "blocs_requis": ["B02", "B04", "B08"],
+      "competences_cles": ["C013", "C037", "C041", "C085", "C091", "C093"]
+    },
+    {
+      "id": "M10",
+      "titre": "Chef de projet digital",
+      "description": "Coordonne et pilote les projets digitaux de l'entreprise",
+      "blocs_requis": ["B02", "B07"],
+      "competences_cles": ["C016", "C020", "C073", "C078", "C021", "C081"]
+    },
+    {
+      "id": "M11",
+      "titre": "Responsable marketing",
+      "description": "Définit et pilote la stratégie marketing multicanal de l'entreprise",
+      "blocs_requis": ["B03", "B07"],
+      "competences_cles": ["C025", "C026", "C029", "C073", "C078", "C034"]
+    },
+    {
+      "id": "M12",
+      "titre": "Account Manager",
+      "description": "Gère la relation client stratégique et développe les comptes",
+      "blocs_requis": ["B03", "B05"],
+      "competences_cles": ["C027", "C031", "C032", "C050", "C035", "C036"]
+    },
+    {
+      "id": "M13",
+      "titre": "Analyste financier",
+      "description": "Évalue la santé financière des entreprises et conseille sur les investissements",
+      "blocs_requis": ["B04", "B08"],
+      "competences_cles": ["C037", "C040", "C041", "C085", "C087", "C046"]
+    },
+    {
+      "id": "M14",
+      "titre": "Contrôleur de gestion",
+      "description": "Pilote la performance financière et aide à la prise de décision stratégique",
+      "blocs_requis": ["B04", "B02"],
+      "competences_cles": ["C037", "C039", "C041", "C043", "C015", "C045"]
+    },
+    {
+      "id": "M15",
+      "titre": "Chargé d'études marketing",
+      "description": "Réalise des études de marché et analyse les comportements consommateurs",
+      "blocs_requis": ["B03", "B08"],
+      "competences_cles": ["C026", "C027", "C085", "C086", "C091", "C094"]
+    },
+    {
+      "id": "M16",
+      "titre": "Responsable communication",
+      "description": "Définit et met en œuvre la stratégie de communication globale de l'entreprise",
+      "blocs_requis": ["B05", "B06"],
+      "competences_cles": ["C049", "C051", "C053", "C061", "C062", "C057"]
+    },
+    {
+      "id": "M17",
+      "titre": "Chargé de relations publiques",
+      "description": "Gère l'image de l'entreprise auprès des médias et du grand public",
+      "blocs_requis": ["B05", "B02"],
+      "competences_cles": ["C050", "C052", "C055", "C056", "C015", "C057"]
+    },
+    {
+      "id": "M18",
+      "titre": "Community Manager",
+      "description": "Anime les communautés en ligne et gère la présence sur les réseaux sociaux",
+      "blocs_requis": ["B07", "B05"],
+      "competences_cles": ["C073", "C074", "C075", "C051", "C082", "C084"]
+    },
+    {
+      "id": "M19",
+      "titre": "Content Manager",
+      "description": "Crée et coordonne la production de contenus éditoriaux multicanaux",
+      "blocs_requis": ["B07", "B05"],
+      "competences_cles": ["C074", "C078", "C080", "C051", "C058", "C082"]
+    },
+    {
+      "id": "M20",
+      "titre": "Social Media Manager",
+      "description": "Pilote la stratégie social media pour développer la notoriété de marque",
+      "blocs_requis": ["B07", "B03"],
+      "competences_cles": ["C073", "C075", "C078", "C079", "C029", "C081"]
+    },
+    {
+      "id": "M21",
+      "titre": "Influenceur / Créateur de contenu",
+      "description": "Produit du contenu créatif pour engager et développer une audience fidèle",
+      "blocs_requis": ["B07", "B06"],
+      "competences_cles": ["C074", "C076", "C084", "C061", "C069", "C082"]
+    },
+    {
+      "id": "M22",
+      "titre": "Graphiste",
+      "description": "Conçoit des supports visuels et graphiques pour divers médias",
+      "blocs_requis": ["B06"],
+      "competences_cles": ["C061", "C064", "C066", "C067", "C069", "C070"]
+    },
+    {
+      "id": "M23",
+      "titre": "Directeur artistique",
+      "description": "Définit l'identité visuelle et supervise l'ensemble des créations graphiques",
+      "blocs_requis": ["B06", "B03"],
+      "competences_cles": ["C062", "C063", "C065", "C029", "C069", "C070"]
+    },
+    {
+      "id": "M24",
+      "titre": "UX/UI Designer",
+      "description": "Conçoit l'expérience utilisateur et les interfaces digitales intuitives",
+      "blocs_requis": ["B06", "B10"],
+      "competences_cles": ["C061", "C062", "C064", "C109", "C069", "C117"]
+    },
+    {
+      "id": "M25",
+      "titre": "Motion Designer",
+      "description": "Crée des animations graphiques pour le digital et la vidéo",
+      "blocs_requis": ["B06", "B07"],
+      "competences_cles": ["C061", "C064", "C068", "C074", "C069", "C082"]
+    },
+    {
+      "id": "M26",
+      "titre": "Traffic Manager",
+      "description": "Optimise les campagnes publicitaires en ligne grâce à l'analyse de données",
+      "blocs_requis": ["B07", "B08"],
+      "competences_cles": ["C075", "C077", "C079", "C085", "C086", "C093"]
+    },
+    {
+      "id": "M27",
+      "titre": "Consultant SEO/SEA",
+      "description": "Améliore la visibilité en ligne par le référencement naturel et payant",
+      "blocs_requis": ["B07", "B08"],
+      "competences_cles": ["C077", "C079", "C075", "C085", "C091", "C083"]
+    },
+    {
+      "id": "M28",
+      "titre": "Data Analyst",
+      "description": "Analyse les données pour produire des insights business actionnables",
+      "blocs_requis": ["B08"],
+      "competences_cles": ["C085", "C086", "C087", "C088", "C091", "C093"]
+    },
+    {
+      "id": "M29",
+      "titre": "Data Scientist",
+      "description": "Développe des modèles prédictifs et d'intelligence artificielle avancés",
+      "blocs_requis": ["B08", "B09"],
+      "competences_cles": ["C085", "C087", "C097", "C100", "C101", "C105"]
+    },
+    {
+      "id": "M30",
+      "titre": "Data Engineer",
+      "description": "Construit et maintient les infrastructures de données robustes et scalables",
+      "blocs_requis": ["B08", "B10"],
+      "competences_cles": ["C085", "C088", "C089", "C109", "C111", "C113"]
+    },
+    {
+      "id": "M31",
+      "titre": "Machine Learning Engineer",
+      "description": "Développe et déploie des algorithmes d'IA en environnement de production",
+      "blocs_requis": ["B09", "B10"],
+      "competences_cles": ["C097", "C101", "C103", "C104", "C109", "C112"]
+    },
+    {
+      "id": "M32",
+      "titre": "Développeur Full Stack",
+      "description": "Développe des applications web complètes frontend et backend",
+      "blocs_requis": ["B10"],
+      "competences_cles": ["C109", "C110", "C111", "C114", "C117", "C119"]
+    },
+    {
+      "id": "M33",
+      "titre": "Ingénieur cybersécurité",
+      "description": "Protège les systèmes informatiques contre les cyberattaques et menaces",
+      "blocs_requis": ["B10"],
+      "competences_cles": ["C109", "C111", "C116", "C112", "C117", "C120"]
+    },
+    {
+      "id": "M34",
+      "titre": "Ingénieur énergies renouvelables",
+      "description": "Conçoit et optimise des installations d'énergie verte et durable",
+      "blocs_requis": ["B11"],
+      "competences_cles": ["C121", "C122", "C124", "C126", "C129", "C131"]
+    },
+    {
+      "id": "M35",
+      "titre": "Ingénieur efficacité énergétique",
+      "description": "Optimise la consommation énergétique en utilisant la data et l'analyse",
+      "blocs_requis": ["B11", "B08"],
+      "competences_cles": ["C122", "C126", "C128", "C085", "C086", "C093"]
+    },
+    {
+      "id": "M36",
+      "titre": "Ingénieur environnement",
+      "description": "Développe des solutions écologiques et durables pour les entreprises",
+      "blocs_requis": ["B11", "B02"],
+      "competences_cles": ["C121", "C126", "C127", "C013", "C015", "C129"]
+    },
+    {
+      "id": "M37",
+      "titre": "Ingénieur automobile",
+      "description": "Conçoit des véhicules et systèmes automobiles innovants incluant l'IA embarquée",
+      "blocs_requis": ["B11", "B09"],
+      "competences_cles": ["C121", "C124", "C125", "C097", "C102", "C130"]
+    },
+    {
+      "id": "M38",
+      "titre": "Ingénieur ferroviaire",
+      "description": "Développe les systèmes et infrastructures ferroviaires modernes",
+      "blocs_requis": ["B11"],
+      "competences_cles": ["C121", "C123", "C124", "C126", "C127", "C130"]
+    },
+    {
+      "id": "M39",
+      "titre": "Ingénieur aéronautique",
+      "description": "Conçoit des aéronefs et analyse leurs performances avec la data",
+      "blocs_requis": ["B11", "B08"],
+      "competences_cles": ["C121", "C122", "C124", "C085", "C087", "C129"]
+    },
+    {
+      "id": "M40",
+      "titre": "Ingénieur systèmes embarqués",
+      "description": "Développe des systèmes électroniques embarqués pour l'industrie et l'automobile",
+      "blocs_requis": ["B11", "B10"],
+      "competences_cles": ["C123", "C125", "C126", "C109", "C114", "C130"]
+    }
+  ]
+}
