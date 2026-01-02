@@ -15,7 +15,7 @@ def charger_referentiel(chemin):
     comp_index = {c['id']: c for b in data['blocs'] for c in b['competences']} # Indexation des compétences
     metier_index = {m['id']: m for m in data['metiers']}                       # Indexation des métiers
     bloc_index = {b['id']: b for b in data['blocs']}                           # Indexation des blocs
-
+    print(bloc_index)
     return data, comp_index, metier_index, bloc_index
 
 
@@ -71,7 +71,7 @@ def analyser_profil(user_input, model_bi, vector_store, model_cross, comp_index)
 
 
 # ÉTAPE 4 : RECOMMANDATION DE MÉTIERS
-def recommander_metiers(scores_comp, data):
+def recommander_metiers(scores_comp,data):
     # Agrégation par bloc
     bloc_scores = {b['id']: [] for b in data['blocs']}
     comp_to_bloc = {c['id']: b['id'] for b in data['blocs'] for c in b['competences']}
@@ -88,6 +88,7 @@ def recommander_metiers(scores_comp, data):
         score_m = 0
         poids_total = 0
         for bid in metier['blocs_requis']:
+
             poids = 1.0  # On peut ajouter un poids spécifique dans le JSON
             score_m += avg_bloc_scores.get(bid, 0) * poids
             poids_total += poids
@@ -96,7 +97,6 @@ def recommander_metiers(scores_comp, data):
             "titre": metier['titre'],
             "score": score_m / poids_total if poids_total > 0 else 0
         })
-
     return sorted(recommandations, key=lambda x: x['score'], reverse=True)[:3], avg_bloc_scores
 
 
@@ -130,9 +130,9 @@ bi_model, vstore = initialiser_moteur_vectoriel(comp_idx)
 cross_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 
 # Test utilisateur
-user_query = "Je sais piloter des campagnes publicitaires sur Facebook Ads et optimiser le référencement naturel des sites web."
+user_query = "Je développe des scripts Python pour nettoyer des bases SQL et entraîner des modèles de classification."
 scores_c = analyser_profil(user_query, bi_model, vstore, cross_model, comp_idx)
-top_metiers, scores_blocs = recommander_metiers(scores_c, data)
+top_metiers, scores_blocs = recommander_metiers(scores_c,data)
 
 print("\n##################################### Top 3 des métiers recommandés #####################################\n")
 for index, metier in enumerate(top_metiers[:3]):
