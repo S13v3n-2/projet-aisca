@@ -124,8 +124,14 @@ CACHE_FILE = "aisca_cache.json"
 
 
 # === EXÉCUTION DU PIPELINE ===
+# Récupère le dossier où se trouve le fichier scoring.py (src/)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Construit le chemin vers data/referentiel.json
+# On remonte d'un cran (..) puis on descend dans data/
+chemin_json = os.path.join(BASE_DIR, "..", "data", "referentiel.json")
 # Initialisation
-data, comp_idx, metier_idx, bloc_idx = charger_referentiel("../data/referentiel.json")
+data, comp_idx, metier_idx, bloc_idx = charger_referentiel(chemin_json)
 bi_model, vstore = initialiser_moteur_vectoriel(comp_idx)
 cross_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 
