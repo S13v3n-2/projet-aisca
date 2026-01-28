@@ -15,7 +15,7 @@ def charger_referentiel(chemin):
     comp_index = {c['id']: c for b in data['blocs'] for c in b['competences']} # Indexation des compétences
     metier_index = {m['id']: m for m in data['metiers']}                       # Indexation des métiers
     bloc_index = {b['id']: b for b in data['blocs']}                           # Indexation des blocs
-    print(bloc_index)
+    #print(bloc_index)
     return data, comp_index, metier_index, bloc_index
 
 
@@ -122,24 +122,30 @@ CACHE_FILE = "aisca_cache.json"
         json.dump(cache, f)
     return response.text"""
 
-
+def test():
 # === EXÉCUTION DU PIPELINE ===
-# Récupère le dossier où se trouve le fichier scoring.py (src/)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    # Initialisation
+    data, comp_idx, metier_idx, bloc_idx = charger_referentiel("data/referentiel.json")
+    #data, comp_idx, metier_idx, bloc_idx = charger_referentiel("../data/referentiel.json")
+    bi_model, vstore = initialiser_moteur_vectoriel(comp_idx)
+    cross_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 
-# Construit le chemin vers data/referentiel.json
-# On remonte d'un cran (..) puis on descend dans data/
-chemin_json = os.path.join(BASE_DIR, "..", "data", "referentiel.json")
-# Initialisation
-data, comp_idx, metier_idx, bloc_idx = charger_referentiel(chemin_json)
-bi_model, vstore = initialiser_moteur_vectoriel(comp_idx)
-cross_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
+    # Test utilisateur
+    user_query = "Je développe des scripts Python pour nettoyer des bases SQL et entraîner des modèles de classification."
+    scores_c = analyser_profil(user_query, bi_model, vstore, cross_model, comp_idx)
+    top_metiers, scores_blocs = recommander_metiers(scores_c,data)
 
-# Test utilisateur
-user_query = "Je développe des scripts Python pour nettoyer des bases SQL et entraîner des modèles de classification."
-scores_c = analyser_profil(user_query, bi_model, vstore, cross_model, comp_idx)
-top_metiers, scores_blocs = recommander_metiers(scores_c,data)
+    print("\n##################################### Top 3 des métiers recommandés #####################################\n")
+    for index, metier in enumerate(top_metiers[:3]):
+        print(f"Top {index + 1} Métier : {metier['titre']} ({metier['score']:.2%})")
 
-print("\n##################################### Top 3 des métiers recommandés #####################################\n")
-for index, metier in enumerate(top_metiers[:3]):
-    print(f"Top {index + 1} Métier : {metier['titre']} ({metier['score']:.2%})")
+def call_model(prompt):
+    data, comp_idx, metier_idx, bloc_idx = charger_referentiel("data/referentiel.json")
+    bi_model, vstore = initialiser_moteur_vectoriel(comp_idx)
+    cross_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
+
+    # Test utilisateur
+    user_query = prompt
+    scores_c = analyser_profil(user_query, bi_model, vstore, cross_model, comp_idx)
+    top_metiers, scores_blocs = recommander_metiers(scores_c, data)
+    return top_metiers, scores_blocs

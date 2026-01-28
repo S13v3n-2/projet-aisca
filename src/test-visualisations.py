@@ -34,14 +34,8 @@ with st.form(key="formulaire", clear_on_submit=True, enter_to_submit=True, borde
 
     st.form_submit_button(label="Submit")
 
-user_query = (f"Domaine qui m'interesse: {Categorie}\n"
-              f"{Experience_passe}\n"
-              f"{Mission_quotidienne}\n"
-              f"{Negociation}\n"
-              f"{Rigueur}")
-print(user_query)
-if user_query:
-    top_metiers, scores_blocs = call_model(user_query)
+if Rigueur:
+    top_metiers, scores_blocs = call_model(Rigueur)
     for index, metier in enumerate(top_metiers[:3]):
         print(f"Top {index + 1} Métier : {metier['titre']} ({metier['score']:.2%})")
         st.write(f"Top {index + 1} Métier : {metier['titre']} ({metier['score']:.2%})")
