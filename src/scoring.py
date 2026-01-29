@@ -1,153 +1,235 @@
+"""
+Module d'analyse sémantique pour l'orientation professionnelle.
+Utilise SentenceTransformers (bi-encoder) + CrossEncoder pour le matching compétences/métiers.
+"""
+
 import json
-import os
-import hashlib
+from pathlib import Path
+from typing import Dict, List, Tuple
 import numpy as np
+import streamlit as st
 from sentence_transformers import SentenceTransformer, util, CrossEncoder
-"""
-import google.generativeai as genai
-"""
 
 
-# ÉTAPE 1 : CHARGEMENT ET INDEXATION
-def charger_referentiel(chemin):
-    with open(chemin, 'r', encoding='utf-8') as f:
+# ============================================================================
+# MODÈLES & DONNÉES (CACHE)
+# ============================================================================
+
+@st.cache_resource
+def get_models() -> Tuple[SentenceTransformer, CrossEncoder]:
+    """
+    Charge les modèles de NLP en cache pour éviter de recharger à chaque requête.
+
+    Returns:
+        bi_model: Modèle bi-encodeur pour embedding sémantique
+        cross_model: Cross-encoder pour re-ranking précis
+    """
+    bi_model = SentenceTransformer('all-MiniLM-L6-v2')
+    cross_model = CrossEncoder('cross-encoder/ms-marco-MiniLM-L6-v2')
+    return bi_model, cross_model
+
+
+@st.cache_data
+def load_and_index_data(json_path: str) -> Tuple[Dict, Dict, List[str], np.ndarray]:
+    """
+    Charge le référentiel métier et pré-calcule les embeddings des compétences.
+
+    Args:
+        json_path: Chemin vers le fichier JSON du référentiel
+
+    Returns:
+        data: Référentiel complet (blocs, compétences, métiers)
+        comp_index: Index {comp_id: compétence}
+        comp_ids: Liste ordonnée des IDs de compétences
+        embeddings: Matrice d'embeddings des compétences
+    """
+    with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    # Indexation pour accès O(1)
-    comp_index = {c['id']: c for b in data['blocs'] for c in b['competences']} # Indexation des compétences
-    metier_index = {m['id']: m for m in data['metiers']}                       # Indexation des métiers
-    bloc_index = {b['id']: b for b in data['blocs']}                           # Indexation des blocs
-    #print(bloc_index)
-    return data, comp_index, metier_index, bloc_index
+    comp_index = {}
+    for bloc in data['blocs']:
+        for comp in bloc['competences']:
+            cid = comp['id']
+            comp_index[cid] = {
+                'texte': comp['texte'],
+                'bloc_id': bloc['id'],
+                'bloc_nom': bloc['nom']
+            }
+
+    bi_model, _ = get_models()
+    comp_ids = list(comp_index.keys())
+    texts = [comp_index[cid]['texte'] for cid in comp_ids]
+
+    embeddings = bi_model.encode(
+        texts,
+        convert_to_tensor=True,
+        show_progress_bar=False,
+        batch_size=64
+    )
+
+    return data, comp_index, comp_ids, embeddings
 
 
-# ÉTAPE 2 : MOTEUR SÉMANTIQUE (BI-ENCODER)
-def initialiser_moteur_vectoriel(comp_index):
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    ids = list(comp_index.keys())
-    textes = [c['texte'] for c in comp_index.values()]
-    embeddings = model.encode(textes, convert_to_tensor=True)
+# ============================================================================
+# ANALYSE SÉMANTIQUE
+# ============================================================================
 
-    # Association de chaque id de compétence a son vecteur
-    vector_store = {ids[i]: embeddings[i] for i in range(len(ids))}
-    return model, vector_store
+def sigmoid(x: float) -> float:
+    """Normalise un score brut en probabilité [0, 1]."""
+    return 1 / (1 + np.exp(-np.clip(x, -20, 20)))
 
 
-# ÉTAPE 3 : LOGIQUE DE SCORING ET RERANKING
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+def analyze_profile(
+        user_text: str,
+        bi_model: SentenceTransformer,
+        comp_ids: List[str],
+        comp_embeddings: np.ndarray,
+        cross_model: CrossEncoder,
+        comp_index: Dict,
+        top_k: int = 40
+) -> Dict[str, float]:
+    """
+    Analyse le profil utilisateur et calcule les scores de match par compétence.
+
+    Pipeline RAG:
+    1. Bi-encoder : recherche sémantique rapide (top_k candidats)
+    2. Cross-encoder : re-ranking précis des candidats
+    3. Normalisation min-max : scores entre 0 et 1
+
+    Args:
+        user_text: Description du profil utilisateur (concaténée)
+        bi_model: Modèle d'embedding
+        comp_ids: Liste des IDs de compétences
+        comp_embeddings: Embeddings pré-calculés des compétences
+        cross_model: Modèle de re-ranking
+        comp_index: Index des compétences
+        top_k: Nombre de compétences candidates à re-ranker
+
+    Returns:
+        Dictionnaire {comp_id: score_normalisé}
+    """
+    # Étape 1 : Embedding du profil utilisateur
+    user_emb = bi_model.encode(user_text, convert_to_tensor=True)
+
+    # Étape 2 : Recherche sémantique avec bi-encoder
+    hits = util.semantic_search(user_emb, comp_embeddings, top_k=top_k)
+
+    candidate_indices = [hit['corpus_id'] for hit in hits[0]]
+    candidate_ids = [comp_ids[idx] for idx in candidate_indices]
+    candidate_texts = [comp_index[cid]['texte'] for cid in candidate_ids]
+
+    # Étape 3 : Re-ranking avec Cross-Encoder
+    pairs = [[user_text, text] for text in candidate_texts]
+    cross_scores = cross_model.predict(pairs)
+
+    # ✅ CORRECTION : Normalisation Min-Max au lieu de Sigmoid
+    # Les scores bruts du cross-encoder sont souvent entre -10 et +10
+    # On normalise entre 0 et 1 de manière linéaire
+
+    min_score = float(np.min(cross_scores))
+    max_score = float(np.max(cross_scores))
+
+    print(f"\n🔍 DEBUG analyze_profile:")
+    print(f"  - Cross-encoder scores: min={min_score:.3f}, max={max_score:.3f}")
+
+    # Si tous les scores sont identiques (rare), on attribue 0.5 partout
+    if max_score == min_score:
+        normalized_scores = [0.5] * len(cross_scores)
+    else:
+        # Normalisation Min-Max : (x - min) / (max - min)
+        normalized_scores = [
+            (score - min_score) / (max_score - min_score)
+            for score in cross_scores
+        ]
+
+    # ✅ BOOST : Appliquer une transformation pour augmenter les scores moyens
+    # Les scores normalisés sont souvent trop bas, on les "boost" avec une puissance
+    BOOST_FACTOR = 0.7  # Plus c'est bas (0.5-0.8), plus les scores sont boostés
+    boosted_scores = [score ** BOOST_FACTOR for score in normalized_scores]
+
+    result = {
+        candidate_ids[idx]: float(boosted_scores[idx])
+        for idx in range(len(candidate_ids))
+    }
+
+    # DEBUG : Afficher les top résultats
+    top_results = sorted(result.items(), key=lambda x: -x[1])[:5]
+    print(f"  - Top 5 compétences finales :")
+    for cid, score in top_results:
+        print(f"    * {comp_index[cid]['texte']}: {score:.2%}")
+
+    return result
 
 
-def analyser_profil(user_input, model_bi, vector_store, model_cross, comp_index):
-    # 1. Retrieval (Bi-Encoder)
-    user_emb = model_bi.encode(user_input, convert_to_tensor=True)
-    initial_results = []
-    for cid, cemb in vector_store.items():
-        score = util.cos_sim(user_emb, cemb).item()
-        initial_results.append({"id": cid, "score": score})
+# ============================================================================
+# RECOMMANDATION MÉTIERS
+# ============================================================================
 
-    # Top 20 pour le reranking
-    top_20 = sorted(initial_results, key=lambda x: x['score'], reverse=True)[:20]
-    passages = [comp_index[res['id']]['texte'] for res in top_20]
+def recommend_jobs(
+    comp_scores: Dict[str, float],
+    data: Dict,
+    top_n: int = 3
+) -> Tuple[List[Dict], Dict[str, float]]:
+    """
+    Recommande les métiers les plus adaptés au profil utilisateur.
 
-    ## Visiualisation des meilleures compétences
-    print("\n##################################### Top 20 des competences Embedding #####################################\n")
-    for top in top_20:
-        print(f"{top['id']} : {comp_index[top['id']]['texte']} ({top['score']:.2%})")
+    Agrégation: moyenne des scores des compétences par bloc,
+    puis moyenne pondérée des blocs requis par métier.
 
+    Args:
+        comp_scores: Scores de match par compétence
+        data: Référentiel métier complet
+        top_n: Nombre de métiers à recommander
 
-    # 2. Re-ranking (Cross-Encoder)
-    # On récupère les rangs et scores précis
-    ranks = model_cross.rank(user_input, passages, return_documents=True)
+    Returns:
+        top_jobs: Liste des top_n métiers {titre, description, score, blocs}
+        bloc_scores: Scores moyens par bloc (pour visualisation)
+    """
+    comp_to_bloc = {}
+    bloc_index = {}
 
-    final_scores = {}
-    for r in ranks:
-        real_id = top_20[r['corpus_id']]['id']
-        # Normalisation entre 0 et 1 pour le scoring
-        final_scores[real_id] = sigmoid(r['score'])
-    print("\n##################################### Apres cross encoder #####################################\n")
-    for cid, score in final_scores.items():
-        print(f"{cid} : {comp_index[cid]['texte']} ({score:.2%})")
-        #print(f"{cid} : {score}")
-    return final_scores
+    for bloc in data['blocs']:
+        bloc_id = bloc['id']
+        bloc_index[bloc_id] = bloc
+        for comp in bloc['competences']:
+            comp_id = comp['id']
+            comp_to_bloc[comp_id] = bloc_id
 
-
-# ÉTAPE 4 : RECOMMANDATION DE MÉTIERS
-def recommander_metiers(scores_comp,data):
-    # Agrégation par bloc
-    bloc_scores = {b['id']: [] for b in data['blocs']}
-    comp_to_bloc = {c['id']: b['id'] for b in data['blocs'] for c in b['competences']}
-
-    for cid, score in scores_comp.items():
+    bloc_scores_raw = {b['id']: [] for b in data['blocs']}
+    for cid, score in comp_scores.items():
         if cid in comp_to_bloc:
-            bloc_scores[comp_to_bloc[cid]].append(score)
+            bid = comp_to_bloc[cid]
+            bloc_scores_raw[bid].append(score)
 
-    # Moyenne par bloc
-    avg_bloc_scores = {bid: np.mean(s) if s else 0.0 for bid, s in bloc_scores.items()}
+    bloc_scores = {
+        bid: float(np.mean(scores)) if scores else 0.0
+        for bid, scores in bloc_scores_raw.items()
+    }
 
-    recommandations = []
-    for metier in data['metiers']:
-        score_m = 0
-        poids_total = 0
-        for bid in metier['blocs_requis']:
+    recommendations = []
+    for job in data['metiers']:
+        bloc_ids = job.get('blocs_requis', [])
+        if not bloc_ids:
+            continue
 
-            poids = 1.0  # On peut ajouter un poids spécifique dans le JSON
-            score_m += avg_bloc_scores.get(bid, 0) * poids
-            poids_total += poids
+        job_bloc_scores = [bloc_scores.get(bid, 0.0) for bid in bloc_ids]
+        job_score = float(np.mean(job_bloc_scores))
 
-        recommandations.append({
-            "titre": metier['titre'],
-            "score": score_m / poids_total if poids_total > 0 else 0
+        job_blocs = [
+            {
+                'nom': bloc_index[bid]['nom'],
+                'score': bloc_scores.get(bid, 0.0)
+            }
+            for bid in bloc_ids
+        ]
+
+        recommendations.append({
+            'titre': job['titre'],
+            'description': job.get('description', ''),
+            'score': job_score,
+            'blocs': job_blocs
         })
-    return sorted(recommandations, key=lambda x: x['score'], reverse=True)[:3], avg_bloc_scores
 
+    top_jobs = sorted(recommendations, key=lambda x: x['score'], reverse=True)[:top_n]
 
-#  ÉTAPE 5 : AGENT RAG AVEC CACHING
-CACHE_FILE = "aisca_cache.json"
-
-
-"""def call_genai_with_cache(prompt):
-    # Gestion du cache local [cite: 71]
-    cache = {}
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, 'r') as f: cache = json.load(f)
-
-    prompt_hash = hashlib.md5(prompt.encode()).hexdigest()
-    if prompt_hash in cache: return cache[prompt_hash]
-
-    # Appel API (Gemini recommandé) [cite: 60]
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content(prompt)
-
-    cache[prompt_hash] = response.text
-    with open(CACHE_FILE, 'w') as f:
-        json.dump(cache, f)
-    return response.text"""
-
-def test():
-# === EXÉCUTION DU PIPELINE ===
-    # Initialisation
-    data, comp_idx, metier_idx, bloc_idx = charger_referentiel("data/referentiel.json")
-    #data, comp_idx, metier_idx, bloc_idx = charger_referentiel("../data/referentiel.json")
-    bi_model, vstore = initialiser_moteur_vectoriel(comp_idx)
-    cross_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
-
-    # Test utilisateur
-    user_query = "Je développe des scripts Python pour nettoyer des bases SQL et entraîner des modèles de classification."
-    scores_c = analyser_profil(user_query, bi_model, vstore, cross_model, comp_idx)
-    top_metiers, scores_blocs = recommander_metiers(scores_c,data)
-
-    print("\n##################################### Top 3 des métiers recommandés #####################################\n")
-    for index, metier in enumerate(top_metiers[:3]):
-        print(f"Top {index + 1} Métier : {metier['titre']} ({metier['score']:.2%})")
-
-def call_model(prompt):
-    data, comp_idx, metier_idx, bloc_idx = charger_referentiel("data/referentiel.json")
-    bi_model, vstore = initialiser_moteur_vectoriel(comp_idx)
-    cross_model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
-
-    # Test utilisateur
-    user_query = prompt
-    scores_c = analyser_profil(user_query, bi_model, vstore, cross_model, comp_idx)
-    top_metiers, scores_blocs = recommander_metiers(scores_c, data)
-    return top_metiers, scores_blocs
+    return top_jobs, bloc_scores
