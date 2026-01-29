@@ -39,11 +39,13 @@ user_query = (f"Domaine qui m'interesse: {Categorie}\n"
               f"{Mission_quotidienne}\n"
               f"{Negociation}\n"
               f"{Rigueur}")
-print(user_query)
-if user_query:
+
+
+if len(user_query):
     top_metiers, scores_blocs = call_model(user_query)
     for index, metier in enumerate(top_metiers[:3]):
         print(f"Top {index + 1} Métier : {metier['titre']} ({metier['score']:.2%})")
         st.write(f"Top {index + 1} Métier : {metier['titre']} ({metier['score']:.2%})")
+
 st.write(Categorie)
 st.write(Rigueur)

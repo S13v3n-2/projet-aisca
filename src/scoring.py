@@ -2,8 +2,10 @@ import json
 import os
 import hashlib
 import numpy as np
-import google.generativeai as genai
 from sentence_transformers import SentenceTransformer, util, CrossEncoder
+"""
+import google.generativeai as genai
+"""
 
 
 # ÉTAPE 1 : CHARGEMENT ET INDEXATION
