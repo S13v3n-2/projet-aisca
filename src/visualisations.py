@@ -2,11 +2,12 @@
 Interface Streamlit - AISCA v2.0
 Questionnaire adapté au référentiel de 11 blocs et 40 métiers
 """
-
+# streamlit run src/visualisations.py
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from pathlib import Path
+#from streamlit_extras.let_it_rain import rain
 
 # ✅ CORRECTION : Noms de fonctions corrects (snake_case)
 from scoring import get_models, load_and_index_data, analyze_profile, recommend_jobs
@@ -51,7 +52,7 @@ with st.spinner("🔄 Chargement des modèles NLP..."):
 # ============================================================================
 
 with st.sidebar:
-    st.image("https://via.placeholder.com/300x100.png?text=AISCA", use_column_width=True)
+    st.image("src/visuel/img/projet_IA_Generative.png", use_container_width=True)
     st.header("ℹ️ Agent RAG Intelligent")
     st.markdown("""
     **Pipeline d'analyse :**
@@ -615,129 +616,36 @@ if submit:
 
         st.dataframe(df_scores, use_container_width=True, hide_index=True)
 
-if submit:
-    # Construction du texte utilisateur enrichi
-    likert_summary = f"""
-    Niveaux de compétences : 
-    Business/Stratégie {business_level}, Finance {finance_level}, 
-    Design {design_level}, Communication {communication_level},
-    Data Analysis {data_analysis_level}, Machine Learning {ml_level},
-    Développement {dev_level}, Ingénierie {engineering_level}.
-    """
+        # Affichage de ballon
+        st.balloons()
+        """
+        Partie DEBUG
+        """
+        # ✅ DEBUG : Afficher le texte généré
+        with st.expander("🔍 DEBUG : Texte utilisateur généré", expanded=False):
+            st.text_area("Texte complet envoyé à l'analyse :", user_text, height=200)
+            st.write(f"**Nombre de mots :** {len(user_text.split())}")
+            st.write(f"**Nombre de caractères :** {len(user_text)}")
 
-    soft_skills_summary = f"""
-    Style de travail : {rigoeur}.
-    Leadership : {leadership}.
-    Persuasion : {persuasion}.
-    Empathie : {empathie}.
-    """
+        # ✅ DEBUG : Afficher le texte enrichi
+        with st.expander("🔍 DEBUG : Texte après enrichissement GenAI", expanded=False):
+            if enriched_projet != projet_tech:
+                st.success(
+                    f"✅ Projet enrichi : {len(enriched_projet.split())} mots (original : {len(projet_tech.split())})")
+            if enriched_interet != interet_specifique:
+                st.success(
+                    f"✅ Intérêt enrichi : {len(enriched_interet.split())} mots (original : {len(interet_specifique.split())})")
+            st.text_area("Texte final envoyé à l'analyse NLP :", final_text, height=200)
 
-    outils_all = outils_data + outils_ml + outils_dev + outils_design + outils_marketing
-
-    background_summary = f"""
-    Formation : {niveau_etudes} en {domaine_formation}.
-    Expérience : {annees_experience} dans le secteur {secteur_actuel}.
-    """
-
-    user_text = " ".join([
-        " ".join(domaines),
-        likert_summary,
-        soft_skills_summary,
-        projet_tech,
-        journee_ideale,
-        interet_specifique,
-        defis_aimes,
-        objectif_carriere,
-        " ".join(outils_all),
-        background_summary
-    ]).strip()
-
-    # ✅ DEBUG : Afficher le texte généré
-    with st.expander("🔍 DEBUG : Texte utilisateur généré", expanded=False):
-        st.text_area("Texte complet envoyé à l'analyse :", user_text, height=200)
-        st.write(f"**Nombre de mots :** {len(user_text.split())}")
-        st.write(f"**Nombre de caractères :** {len(user_text)}")
-
-    # ✅ VALIDATION RENFORCÉE
-    word_count = len(user_text.split())
-
-    if word_count < 30:
-        st.error(f"❌ **Texte trop court ({word_count} mots)**")
-        st.warning("""
-        **Pour obtenir des résultats fiables, veuillez :**
-
-        1. Sélectionner au moins **2 domaines d'intérêt**
-        2. Remplir au moins **2 questions ouvertes** (projet, journée idéale, défis, objectifs)
-        3. Sélectionner quelques **outils/technologies** que vous maîtrisez
-        4. Renseigner votre **formation** et **expérience**
-
-        **Texte minimum requis : 30 mots** (actuellement : {word_count} mots)
-        """)
-        st.stop()
-
-    if word_count < 50:
-        st.warning(
-            f"⚠️ Texte court ({word_count} mots). Pour des résultats optimaux, visez 100+ mots en détaillant vos expériences.")
-
-    # === ÉTAPE 1 : Enrichissement GenAI conditionnel ===
-    with st.spinner("🔍 Prétraitement sémantique avec GenAI..."):
-        enriched_projet = enrich_short_text(projet_tech) if len(projet_tech.split()) < 15 else projet_tech
-        enriched_interet = enrich_short_text(interet_specifique) if len(
-            interet_specifique.split()) < 10 else interet_specifique
-
-        final_text = user_text.replace(projet_tech, enriched_projet).replace(interet_specifique, enriched_interet)
-
-    # ✅ DEBUG : Afficher le texte enrichi
-    with st.expander("🔍 DEBUG : Texte après enrichissement GenAI", expanded=False):
-        if enriched_projet != projet_tech:
-            st.success(
-                f"✅ Projet enrichi : {len(enriched_projet.split())} mots (original : {len(projet_tech.split())})")
-        if enriched_interet != interet_specifique:
-            st.success(
-                f"✅ Intérêt enrichi : {len(enriched_interet.split())} mots (original : {len(interet_specifique.split())})")
-        st.text_area("Texte final envoyé à l'analyse NLP :", final_text, height=200)
-
-    # === ÉTAPE 2 : Analyse sémantique (RAG - Retrieval) ===
-    with st.spinner("🧠 Analyse NLP sémantique en cours..."):
-        comp_scores = analyze_profile(
-            final_text, bi_model, comp_ids, embeddings,
-            cross_model, comp_idx, top_k=40
-        )
-
-        top_jobs, bloc_scores = recommend_jobs(comp_scores, data, top_n=3)
-
-    # ✅ DEBUG : Afficher les scores de compétences
-    with st.expander("🔍 DEBUG : Scores des compétences détectées", expanded=False):
-        if comp_scores:
-            top_comps = sorted(comp_scores.items(), key=lambda x: -x[1])[:10]
-            st.write("**Top 10 compétences matchées :**")
-            for cid, score in top_comps:
-                st.write(f"- {comp_idx[cid]['texte']} : {score:.2%}")
-        else:
-            st.error("❌ Aucune compétence détectée ! Problème dans l'analyse.")
-
-    # ✅ VÉRIFICATION : Au moins 1 métier avec score > 0
-    if not top_jobs or top_jobs[0]['score'] == 0:
-        st.error("❌ **Aucun métier correspondant trouvé !**")
-        st.warning("""
-        **Raisons possibles :**
-
-        1. **Texte trop générique** : Soyez plus spécifique sur vos compétences techniques
-        2. **Vocabulaire inadapté** : Utilisez des termes techniques liés aux métiers du référentiel
-        3. **Manque de contexte** : Détaillez vos projets et expériences concrètes
-
-        **Exemple de texte efficace :**
-
-        *"J'ai développé un système de recommandation avec Python et scikit-learn. 
-        J'utilise pandas pour nettoyer des datasets, matplotlib pour visualiser les données.
-        Mon objectif est de devenir Data Scientist dans une fintech."*
-        """)
-        st.stop()
-
-    st.success("✅ Analyse terminée avec succès !")
-
-    # === AFFICHAGE DES RÉSULTATS (reste inchangé) ===
-    # ... (le reste du code d'affichage)
+        # ✅ DEBUG : Afficher les scores de compétences
+        with st.expander("🔍 DEBUG : Scores des compétences détectées", expanded=False):
+            if comp_scores:
+                top_comps = sorted(comp_scores.items(), key=lambda x: -x[1])[:10]
+                st.write("**Top 10 compétences matchées :**")
+                for cid, score in top_comps:
+                    st.write(f"- {comp_idx[cid]['texte']} : {score:.2%}")
+            else:
+                st.error("❌ Aucune compétence détectée ! Problème dans l'analyse.")
 
 st.divider()
 st.caption("AISCA © 2026 | EFREI - Master Data Engineering & AI | Projet IA Générative - Bloc RNCP40875")
