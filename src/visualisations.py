@@ -493,7 +493,7 @@ if submit:
         # === TABS DES MÉTIERS RECOMMANDÉS ===
         st.subheader("🎯 Top 3 des métiers recommandés")
 
-        tabs = st.tabs([f"#{i+1} {job['titre']} ({job['score']:.0%})" for i, job in enumerate(top_jobs)])
+        tabs = st.tabs([f"#{i + 1} {job['titre']} ({job['score']:.0%})" for i, job in enumerate(top_jobs)])
 
         for i, (tab, job) in enumerate(zip(tabs, top_jobs)):
             with tab:
@@ -501,51 +501,92 @@ if submit:
 
                 with col1:
                     st.markdown(f"### {job['titre']}")
-                    st.progress(job['score'])
+
+                    # Conversion en float standard pour éviter les erreurs de type
+                    global_score = float(job['score'])
+                    st.progress(max(0.0, min(1.0, global_score)))
 
                     if job.get('description'):
                         st.info(f"**Description :** {job['description']}")
 
-                    # Radar chart des blocs de compétences
-                    if job['blocs']:
-                        fig = go.Figure()
+                    # --- SECTION GRAPHIQUE OPTIMISÉE ---
+                    if job.get('blocs') and len(job['blocs']) > 0:
+                        labels = [b['nom'] for b in job['blocs']]
+                        values = [float(b['score']) for b in job['blocs']]
 
-                        fig.add_trace(go.Scatterpolar(
-                            r=[b['score'] for b in job['blocs']],
-                            theta=[b['nom'][:20] for b in job['blocs']],
-                            fill='toself',
-                            name='Votre profil',
-                            line=dict(color='#1f77b4', width=2)
-                        ))
+                        # UX : Si moins de 3 axes, le Radar est illisible -> Utilisation d'un Bar Chart
+                        if len(labels) < 3:
+                            fig = go.Figure(go.Bar(
+                                x=values,
+                                y=labels,
+                                orientation='h',
+                                marker=dict(color='#1f77b4', line=dict(color='white', width=1)),
+                                text=[f"{v:.0%}" for v in values],
+                                textposition='auto',
+                            ))
+                            fig.update_layout(
+                                title=f"Adéquation par bloc : {job['titre']}",
+                                xaxis=dict(range=[0, 1], tickformat='.0%'),
+                                yaxis=dict(autorange="reversed"),  # Lecture de haut en bas
+                                height=300,
+                                margin=dict(l=20, r=20, t=50, b=20),
+                                paper_bgcolor='rgba(0,0,0,0)',
+                                plot_bgcolor='rgba(0,0,0,0)'
+                            )
+                        else:
+                            # UX : Radar Chart fermé et stylisé
+                            # On répète le premier élément pour fermer la ligne du radar
+                            labels_radar = labels + [labels[0]]
+                            values_radar = values + [values[0]]
 
-                        fig.update_layout(
-                            polar=dict(
-                                radialaxis=dict(
-                                    visible=True,
-                                    range=[0, 1],
-                                    tickformat='.0%'
-                                )
-                            ),
-                            showlegend=False,
-                            height=400,
-                            title=f"Cartographie des compétences pour {job['titre']}"
-                        )
+                            fig = go.Figure()
+                            fig.add_trace(go.Scatterpolar(
+                                r=values_radar,
+                                theta=labels_radar,
+                                fill='toself',
+                                fillcolor='rgba(31, 119, 180, 0.3)',
+                                name='Votre profil',
+                                line=dict(color='#1f77b4', width=3),
+                                marker=dict(size=8)
+                            ))
+
+                            fig.update_layout(
+                                polar=dict(
+                                    radialaxis=dict(
+                                        visible=True,
+                                        range=[0, 1],
+                                        tickformat='.0%',
+                                        gridcolor="#444",
+                                        tickfont=dict(size=10)
+                                    ),
+                                    angularaxis=dict(
+                                        gridcolor="#444",
+                                        tickfont=dict(size=11)
+                                    ),
+                                    bgcolor='rgba(0,0,0,0)'
+                                ),
+                                showlegend=False,
+                                height=450,
+                                margin=dict(l=80, r=80, t=60, b=40),
+                                title=f"Cartographie des compétences : {job['titre']}"
+                            )
 
                         st.plotly_chart(fig, use_container_width=True)
 
                 with col2:
-                    st.metric("Score Global", f"{job['score']:.0%}")
+                    st.metric("Score Global", f"{global_score:.0%}")
 
                     if i < len(top_jobs) - 1:
-                        delta = job['score'] - top_jobs[i+1]['score']
-                        st.metric("Écart avec #" + str(i+2), f"+{delta:.1%}")
+                        delta = global_score - float(top_jobs[i + 1]['score'])
+                        st.metric("Écart avec #" + str(i + 2), f"+{delta:.1%}")
 
-                    with st.expander("📊 Détail des blocs"):
+                    st.write("---")
+                    with st.expander("📊 Détail des blocs", expanded=True):
                         for bloc in job['blocs']:
+                            b_score = float(bloc['score'])
                             st.write(f"**{bloc['nom']}**")
-                            st.progress(bloc['score'])
-                            st.caption(f"Score : {bloc['score']:.0%}")
-                            st.divider()
+                            st.progress(max(0.0, min(1.0, b_score)))
+                            st.caption(f"Adéquation : {b_score:.0%}")
 
         # === GÉNÉRATION PLAN + BIO (RAG - Generation) ===
         st.divider()
