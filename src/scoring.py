@@ -277,9 +277,22 @@ def recommend_jobs(
 ) -> Tuple[List[Dict], Dict[str, float]]:
     """
     Recommande les métiers les plus adaptés au profil utilisateur.
-    Agrégation par moyenne des scores de compétences par bloc,
-    puis moyenne des blocs requis par métier.
+
+    FIX #7 : Moyenne pondérée par rang des blocs requis.
+    Le 1er bloc requis d'un métier compte 4x plus que le 3ème.
+    Différencie Data Scientist (B09 en rang 1) de Full Stack (B10 en rang 1).
+
+    FIX #8 : Bonus compétences clés (30% du score final).
+    Affine le classement entre métiers ayant les mêmes blocs.
+
+    Poids par rang :
+      rang 1 → 4.0  (bloc principal, très discriminant)
+      rang 2 → 2.0
+      rang 3 → 1.0
+      rang 4 → 0.5
     """
+    RANK_WEIGHTS = [4.0, 2.0, 1.0, 0.5]
+
     comp_to_bloc = {}
     bloc_index   = {}
 
@@ -305,8 +318,20 @@ def recommend_jobs(
         if not bloc_ids:
             continue
 
-        job_bloc_scores = [bloc_scores.get(bid, 0.0) for bid in bloc_ids]
-        job_score       = float(np.mean(job_bloc_scores))
+        # FIX #7 : Moyenne pondérée par rang
+        total_weight = 0.0
+        weighted_sum = 0.0
+        for rank, bid in enumerate(bloc_ids):
+            weight = RANK_WEIGHTS[rank] if rank < len(RANK_WEIGHTS) else 0.25
+            weighted_sum += bloc_scores.get(bid, 0.0) * weight
+            total_weight += weight
+        base_score = weighted_sum / total_weight if total_weight > 0 else 0.0
+
+        # FIX #8 : Bonus compétences clés
+        cles = job.get('competences_cles', [])
+        bonus = float(np.mean([comp_scores.get(cid, 0.0) for cid in cles])) * 0.3 if cles else 0.0
+
+        job_score = base_score * 0.7 + bonus
 
         job_blocs = [
             {'nom': bloc_index[bid]['nom'], 'score': bloc_scores.get(bid, 0.0)}
@@ -319,6 +344,11 @@ def recommend_jobs(
             'score':       job_score,
             'blocs':       job_blocs
         })
+
+    top_all = sorted(recommendations, key=lambda x: x['score'], reverse=True)[:5]
+    print(f"\n🏆 DEBUG recommend_jobs (top 5) :")
+    for r in top_all:
+        print(f"  {r['titre']:45s} → {r['score']:.2%}")
 
     top_jobs = sorted(recommendations, key=lambda x: x['score'], reverse=True)[:top_n]
     return top_jobs, bloc_scores
