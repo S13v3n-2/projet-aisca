@@ -742,282 +742,782 @@
     {
       "id": "M01",
       "titre": "Avocat d'affaires",
-      "description": "Conseille les entreprises sur les aspects juridiques et stratégiques de leurs opérations",
-      "blocs_requis": ["B01", "B02"],
-      "competences_cles": ["C001", "C002", "C003", "C009", "C013", "C015"]
+      "description": "Conseille les entreprises sur les aspects juridiques stratégiques et représente en contentieux commercial",
+      "blocs_requis": [
+        "B01",
+        "B02",
+        "B05"
+      ],
+      "competences_cles": [
+        "C001",
+        "C002",
+        "C003",
+        "C007",
+        "C009",
+        "C015",
+        "C057"
+      ]
     },
     {
       "id": "M02",
       "titre": "Juriste d'entreprise",
-      "description": "Assure la sécurité juridique des opérations commerciales et contractuelles",
-      "blocs_requis": ["B01", "B02"],
-      "competences_cles": ["C001", "C003", "C004", "C005", "C016", "C010"]
+      "description": "Assure la sécurité juridique des opérations commerciales, contractuelles et sociales",
+      "blocs_requis": [
+        "B01",
+        "B02",
+        "B04"
+      ],
+      "competences_cles": [
+        "C001",
+        "C003",
+        "C004",
+        "C005",
+        "C006",
+        "C010",
+        "C019"
+      ]
     },
     {
       "id": "M03",
       "titre": "Notaire",
-      "description": "Authentifie les actes juridiques et conseille en gestion patrimoniale",
-      "blocs_requis": ["B01", "B04"],
-      "competences_cles": ["C001", "C003", "C008", "C037", "C040", "C010"]
+      "description": "Authentifie les actes juridiques et conseille en gestion patrimoniale et immobilière",
+      "blocs_requis": [
+        "B01",
+        "B04",
+        "B05"
+      ],
+      "competences_cles": [
+        "C001",
+        "C003",
+        "C008",
+        "C037",
+        "C040",
+        "C010",
+        "C057"
+      ]
     },
     {
       "id": "M04",
       "titre": "Consultant en conformité RGPD",
       "description": "Assure la conformité des données personnelles et des systèmes informatiques aux réglementations",
-      "blocs_requis": ["B01", "B10"],
-      "competences_cles": ["C004", "C006", "C116", "C111", "C010", "C011"]
+      "blocs_requis": [
+        "B01",
+        "B10",
+        "B08",
+        "B02"
+      ],
+      "competences_cles": [
+        "C004",
+        "C006",
+        "C116",
+        "C111",
+        "C010",
+        "C011",
+        "C016"
+      ]
     },
     {
       "id": "M05",
       "titre": "Responsable affaires réglementaires",
-      "description": "Veille au respect des réglementations dans les secteurs hautement régulés",
-      "blocs_requis": ["B01", "B02"],
-      "competences_cles": ["C004", "C006", "C007", "C015", "C016", "C012"]
+      "description": "Veille au respect des réglementations dans les secteurs hautement régulés (pharma, finance, énergie)",
+      "blocs_requis": [
+        "B01",
+        "B02",
+        "B08"
+      ],
+      "competences_cles": [
+        "C004",
+        "C006",
+        "C007",
+        "C015",
+        "C016",
+        "C012",
+        "C091"
+      ]
     },
     {
       "id": "M06",
       "titre": "Consultant en stratégie",
-      "description": "Accompagne les entreprises dans leurs décisions stratégiques et transformations",
-      "blocs_requis": ["B02", "B04"],
-      "competences_cles": ["C013", "C015", "C017", "C037", "C021", "C024"]
+      "description": "Accompagne les directions générales dans leurs décisions stratégiques et transformations organisationnelles",
+      "blocs_requis": [
+        "B02",
+        "B04",
+        "B05"
+      ],
+      "competences_cles": [
+        "C013",
+        "C015",
+        "C017",
+        "C037",
+        "C021",
+        "C024",
+        "C091"
+      ]
     },
     {
       "id": "M07",
       "titre": "Chef de produit",
       "description": "Pilote le développement et le lancement de produits du concept à la commercialisation",
-      "blocs_requis": ["B02", "B03"],
-      "competences_cles": ["C013", "C016", "C026", "C029", "C021", "C023"]
+      "blocs_requis": [
+        "B02",
+        "B03",
+        "B07",
+        "B06"
+      ],
+      "competences_cles": [
+        "C013",
+        "C016",
+        "C026",
+        "C029",
+        "C021",
+        "C023",
+        "C078"
+      ]
     },
     {
       "id": "M08",
       "titre": "Responsable développement commercial",
       "description": "Développe le portefeuille clients et pilote la croissance du chiffre d'affaires",
-      "blocs_requis": ["B02", "B03"],
-      "competences_cles": ["C013", "C017", "C028", "C031", "C032", "C033"]
+      "blocs_requis": [
+        "B03",
+        "B02",
+        "B01"
+      ],
+      "competences_cles": [
+        "C013",
+        "C017",
+        "C028",
+        "C031",
+        "C032",
+        "C033",
+        "C057"
+      ]
     },
     {
       "id": "M09",
       "titre": "Business Analyst",
       "description": "Analyse les données pour éclairer les décisions stratégiques et opérationnelles",
-      "blocs_requis": ["B02", "B04", "B08"],
-      "competences_cles": ["C013", "C037", "C041", "C085", "C091", "C093"]
+      "blocs_requis": [
+        "B08",
+        "B02",
+        "B05",
+        "B04"
+      ],
+      "competences_cles": [
+        "C013",
+        "C037",
+        "C041",
+        "C085",
+        "C091",
+        "C093",
+        "C046"
+      ]
     },
     {
       "id": "M10",
       "titre": "Chef de projet digital",
-      "description": "Coordonne et pilote les projets digitaux de l'entreprise",
-      "blocs_requis": ["B02", "B07"],
-      "competences_cles": ["C016", "C020", "C073", "C078", "C021", "C081"]
+      "description": "Coordonne et pilote les projets digitaux en interface entre métiers et équipes techniques",
+      "blocs_requis": [
+        "B02",
+        "B07",
+        "B05"
+      ],
+      "competences_cles": [
+        "C016",
+        "C020",
+        "C073",
+        "C078",
+        "C021",
+        "C081",
+        "C114"
+      ]
     },
     {
       "id": "M11",
       "titre": "Responsable marketing",
       "description": "Définit et pilote la stratégie marketing multicanal de l'entreprise",
-      "blocs_requis": ["B03", "B07"],
-      "competences_cles": ["C025", "C026", "C029", "C073", "C078", "C034"]
+      "blocs_requis": [
+        "B03",
+        "B07",
+        "B02",
+        "B08"
+      ],
+      "competences_cles": [
+        "C025",
+        "C026",
+        "C029",
+        "C073",
+        "C078",
+        "C034",
+        "C091"
+      ]
     },
     {
       "id": "M12",
       "titre": "Account Manager",
-      "description": "Gère la relation client stratégique et développe les comptes",
-      "blocs_requis": ["B03", "B05"],
-      "competences_cles": ["C027", "C031", "C032", "C050", "C035", "C036"]
+      "description": "Gère la relation client stratégique et développe les comptes clés",
+      "blocs_requis": [
+        "B05",
+        "B03",
+        "B02"
+      ],
+      "competences_cles": [
+        "C027",
+        "C031",
+        "C032",
+        "C050",
+        "C035",
+        "C036",
+        "C015"
+      ]
     },
     {
       "id": "M13",
       "titre": "Analyste financier",
       "description": "Évalue la santé financière des entreprises et conseille sur les investissements",
-      "blocs_requis": ["B04", "B08"],
-      "competences_cles": ["C037", "C040", "C041", "C085", "C087", "C046"]
+      "blocs_requis": [
+        "B04",
+        "B08",
+        "B01"
+      ],
+      "competences_cles": [
+        "C037",
+        "C040",
+        "C041",
+        "C085",
+        "C087",
+        "C046",
+        "C013"
+      ]
     },
     {
       "id": "M14",
       "titre": "Contrôleur de gestion",
-      "description": "Pilote la performance financière et aide à la prise de décision stratégique",
-      "blocs_requis": ["B04", "B02"],
-      "competences_cles": ["C037", "C039", "C041", "C043", "C015", "C045"]
+      "description": "Pilote la performance financière opérationnelle et aide à la prise de décision",
+      "blocs_requis": [
+        "B04",
+        "B08",
+        "B09"
+      ],
+      "competences_cles": [
+        "C037",
+        "C039",
+        "C041",
+        "C043",
+        "C085",
+        "C090",
+        "C045"
+      ]
     },
     {
       "id": "M15",
       "titre": "Chargé d'études marketing",
       "description": "Réalise des études de marché et analyse les comportements consommateurs",
-      "blocs_requis": ["B03", "B08"],
-      "competences_cles": ["C026", "C027", "C085", "C086", "C091", "C094"]
+      "blocs_requis": [
+        "B03",
+        "B08",
+        "B05"
+      ],
+      "competences_cles": [
+        "C026",
+        "C027",
+        "C085",
+        "C086",
+        "C091",
+        "C094",
+        "C058"
+      ]
     },
     {
       "id": "M16",
       "titre": "Responsable communication",
       "description": "Définit et met en œuvre la stratégie de communication globale de l'entreprise",
-      "blocs_requis": ["B05", "B06"],
-      "competences_cles": ["C049", "C051", "C053", "C061", "C062", "C057"]
+      "blocs_requis": [
+        "B05",
+        "B02",
+        "B03",
+        "B07"
+      ],
+      "competences_cles": [
+        "C049",
+        "C051",
+        "C053",
+        "C061",
+        "C062",
+        "C057",
+        "C078"
+      ]
     },
     {
       "id": "M17",
       "titre": "Chargé de relations publiques",
-      "description": "Gère l'image de l'entreprise auprès des médias et du grand public",
-      "blocs_requis": ["B05", "B02"],
-      "competences_cles": ["C050", "C052", "C055", "C056", "C015", "C057"]
+      "description": "Gère l'image de l'entreprise auprès des médias, journalistes et grand public",
+      "blocs_requis": [
+        "B05",
+        "B06",
+        "B07",
+        "B02"
+      ],
+      "competences_cles": [
+        "C050",
+        "C052",
+        "C055",
+        "C056",
+        "C015",
+        "C057",
+        "C063"
+      ]
     },
     {
       "id": "M18",
       "titre": "Community Manager",
-      "description": "Anime les communautés en ligne et gère la présence sur les réseaux sociaux",
-      "blocs_requis": ["B07", "B05"],
-      "competences_cles": ["C073", "C074", "C075", "C051", "C082", "C084"]
+      "description": "Anime les communautés en ligne, gère la présence sur les réseaux sociaux et engage les abonnés",
+      "blocs_requis": [
+        "B07",
+        "B05",
+        "B03",
+        "B06"
+      ],
+      "competences_cles": [
+        "C073",
+        "C074",
+        "C075",
+        "C051",
+        "C082",
+        "C084",
+        "C069"
+      ]
     },
     {
       "id": "M19",
       "titre": "Content Manager",
-      "description": "Crée et coordonne la production de contenus éditoriaux multicanaux",
-      "blocs_requis": ["B07", "B05"],
-      "competences_cles": ["C074", "C078", "C080", "C051", "C058", "C082"]
+      "description": "Crée et coordonne la production de contenus éditoriaux et la stratégie éditoriale multicanaux",
+      "blocs_requis": [
+        "B07",
+        "B05",
+        "B08"
+      ],
+      "competences_cles": [
+        "C074",
+        "C078",
+        "C080",
+        "C051",
+        "C058",
+        "C082",
+        "C091"
+      ]
     },
     {
       "id": "M20",
       "titre": "Social Media Manager",
-      "description": "Pilote la stratégie social media pour développer la notoriété de marque",
-      "blocs_requis": ["B07", "B03"],
-      "competences_cles": ["C073", "C075", "C078", "C079", "C029", "C081"]
+      "description": "Pilote la stratégie social media globale pour développer la notoriété et l'engagement de marque",
+      "blocs_requis": [
+        "B07",
+        "B03",
+        "B05",
+        "B08"
+      ],
+      "competences_cles": [
+        "C073",
+        "C075",
+        "C078",
+        "C079",
+        "C029",
+        "C081",
+        "C086"
+      ]
     },
     {
       "id": "M21",
       "titre": "Influenceur / Créateur de contenu",
-      "description": "Produit du contenu créatif pour engager et développer une audience fidèle",
-      "blocs_requis": ["B07", "B06"],
-      "competences_cles": ["C074", "C076", "C084", "C061", "C069", "C082"]
+      "description": "Produit du contenu créatif authentique pour engager et développer une audience fidèle",
+      "blocs_requis": [
+        "B07",
+        "B06",
+        "B03"
+      ],
+      "competences_cles": [
+        "C074",
+        "C076",
+        "C084",
+        "C061",
+        "C069",
+        "C082",
+        "C051"
+      ]
     },
     {
       "id": "M22",
       "titre": "Graphiste",
-      "description": "Conçoit des supports visuels et graphiques pour divers médias",
-      "blocs_requis": ["B06"],
-      "competences_cles": ["C061", "C064", "C066", "C067", "C069", "C070"]
+      "description": "Conçoit des supports visuels et graphiques pour divers médias print et digital",
+      "blocs_requis": [
+        "B06",
+        "B05",
+        "B03",
+        "B10"
+      ],
+      "competences_cles": [
+        "C061",
+        "C064",
+        "C066",
+        "C067",
+        "C069",
+        "C070",
+        "C074"
+      ]
     },
     {
       "id": "M23",
       "titre": "Directeur artistique",
-      "description": "Définit l'identité visuelle et supervise l'ensemble des créations graphiques",
-      "blocs_requis": ["B06", "B03"],
-      "competences_cles": ["C062", "C063", "C065", "C029", "C069", "C070"]
+      "description": "Définit l'identité visuelle stratégique et supervise l'ensemble des créations graphiques",
+      "blocs_requis": [
+        "B06",
+        "B03",
+        "B05",
+        "B02"
+      ],
+      "competences_cles": [
+        "C062",
+        "C063",
+        "C065",
+        "C029",
+        "C069",
+        "C070",
+        "C049"
+      ]
     },
     {
       "id": "M24",
       "titre": "UX/UI Designer",
-      "description": "Conçoit l'expérience utilisateur et les interfaces digitales intuitives",
-      "blocs_requis": ["B06", "B10"],
-      "competences_cles": ["C061", "C062", "C064", "C109", "C069", "C117"]
+      "description": "Conçoit l'expérience utilisateur et les interfaces digitales intuitives et accessibles",
+      "blocs_requis": [
+        "B06",
+        "B10",
+        "B08"
+      ],
+      "competences_cles": [
+        "C061",
+        "C062",
+        "C064",
+        "C109",
+        "C069",
+        "C117",
+        "C081"
+      ]
     },
     {
       "id": "M25",
       "titre": "Motion Designer",
-      "description": "Crée des animations graphiques pour le digital et la vidéo",
-      "blocs_requis": ["B06", "B07"],
-      "competences_cles": ["C061", "C064", "C068", "C074", "C069", "C082"]
+      "description": "Crée des animations graphiques et contenus vidéo pour le digital et la communication",
+      "blocs_requis": [
+        "B06",
+        "B07",
+        "B05"
+      ],
+      "competences_cles": [
+        "C061",
+        "C064",
+        "C068",
+        "C074",
+        "C069",
+        "C082",
+        "C109"
+      ]
     },
     {
       "id": "M26",
       "titre": "Traffic Manager",
-      "description": "Optimise les campagnes publicitaires en ligne grâce à l'analyse de données",
-      "blocs_requis": ["B07", "B08"],
-      "competences_cles": ["C075", "C077", "C079", "C085", "C086", "C093"]
+      "description": "Optimise les campagnes publicitaires en ligne et maximise le ROI des investissements media",
+      "blocs_requis": [
+        "B07",
+        "B08",
+        "B10",
+        "B03"
+      ],
+      "competences_cles": [
+        "C075",
+        "C077",
+        "C079",
+        "C085",
+        "C086",
+        "C093",
+        "C030"
+      ]
     },
     {
       "id": "M27",
       "titre": "Consultant SEO/SEA",
-      "description": "Améliore la visibilité en ligne par le référencement naturel et payant",
-      "blocs_requis": ["B07", "B08"],
-      "competences_cles": ["C077", "C079", "C075", "C085", "C091", "C083"]
+      "description": "Améliore la visibilité en ligne par le référencement naturel et les campagnes payantes",
+      "blocs_requis": [
+        "B07",
+        "B08",
+        "B10",
+        "B09"
+      ],
+      "competences_cles": [
+        "C077",
+        "C079",
+        "C075",
+        "C085",
+        "C091",
+        "C083",
+        "C109"
+      ]
     },
     {
       "id": "M28",
       "titre": "Data Analyst",
-      "description": "Analyse les données pour produire des insights business actionnables",
-      "blocs_requis": ["B08"],
-      "competences_cles": ["C085", "C086", "C087", "C088", "C091", "C093"]
+      "description": "Analyse les données pour produire des insights business actionnables et des tableaux de bord",
+      "blocs_requis": [
+        "B08",
+        "B04",
+        "B02",
+        "B06"
+      ],
+      "competences_cles": [
+        "C085",
+        "C086",
+        "C087",
+        "C088",
+        "C091",
+        "C093",
+        "C041"
+      ]
     },
     {
       "id": "M29",
       "titre": "Data Scientist",
-      "description": "Développe des modèles prédictifs et d'intelligence artificielle avancés",
-      "blocs_requis": ["B08", "B09"],
-      "competences_cles": ["C085", "C087", "C097", "C100", "C101", "C105"]
+      "description": "Développe des modèles prédictifs et d'intelligence artificielle avancés pour des problèmes complexes",
+      "blocs_requis": [
+        "B09",
+        "B08",
+        "B02",
+        "B10"
+      ],
+      "competences_cles": [
+        "C085",
+        "C087",
+        "C097",
+        "C100",
+        "C101",
+        "C105",
+        "C109"
+      ]
     },
     {
       "id": "M30",
       "titre": "Data Engineer",
-      "description": "Construit et maintient les infrastructures de données robustes et scalables",
-      "blocs_requis": ["B08", "B10"],
-      "competences_cles": ["C085", "C088", "C089", "C109", "C111", "C113"]
+      "description": "Construit et maintient les infrastructures de données robustes, scalables et fiables",
+      "blocs_requis": [
+        "B10",
+        "B08",
+        "B04",
+        "B09"
+      ],
+      "competences_cles": [
+        "C085",
+        "C088",
+        "C089",
+        "C109",
+        "C111",
+        "C113",
+        "C097"
+      ]
     },
     {
       "id": "M31",
       "titre": "Machine Learning Engineer",
-      "description": "Développe et déploie des algorithmes d'IA en environnement de production",
-      "blocs_requis": ["B09", "B10"],
-      "competences_cles": ["C097", "C101", "C103", "C104", "C109", "C112"]
+      "description": "Développe et déploie des algorithmes d'IA robustes en environnement de production industriel",
+      "blocs_requis": [
+        "B10",
+        "B09",
+        "B11",
+        "B08"
+      ],
+      "competences_cles": [
+        "C097",
+        "C101",
+        "C103",
+        "C104",
+        "C109",
+        "C112",
+        "C085"
+      ]
     },
     {
       "id": "M32",
       "titre": "Développeur Full Stack",
-      "description": "Développe des applications web complètes frontend et backend",
-      "blocs_requis": ["B10"],
-      "competences_cles": ["C109", "C110", "C111", "C114", "C117", "C119"]
+      "description": "Développe des applications web complètes frontend et backend, de l'interface à la base de données",
+      "blocs_requis": [
+        "B10",
+        "B09",
+        "B08"
+      ],
+      "competences_cles": [
+        "C109",
+        "C110",
+        "C111",
+        "C114",
+        "C117",
+        "C119",
+        "C016"
+      ]
     },
     {
       "id": "M33",
       "titre": "Ingénieur cybersécurité",
-      "description": "Protège les systèmes informatiques contre les cyberattaques et menaces",
-      "blocs_requis": ["B10"],
-      "competences_cles": ["C109", "C111", "C116", "C112", "C117", "C120"]
+      "description": "Protège les systèmes informatiques contre les cyberattaques, audite les vulnérabilités et sécurise les infrastructures",
+      "blocs_requis": [
+        "B10",
+        "B01",
+        "B11",
+        "B02"
+      ],
+      "competences_cles": [
+        "C109",
+        "C111",
+        "C116",
+        "C112",
+        "C117",
+        "C120",
+        "C004"
+      ]
     },
     {
       "id": "M34",
       "titre": "Ingénieur énergies renouvelables",
-      "description": "Conçoit et optimise des installations d'énergie verte et durable",
-      "blocs_requis": ["B11"],
-      "competences_cles": ["C121", "C122", "C124", "C126", "C129", "C131"]
+      "description": "Conçoit et optimise des installations d'énergie verte, solaire, éolienne et hydraulique",
+      "blocs_requis": [
+        "B11",
+        "B08",
+        "B02",
+        "B04"
+      ],
+      "competences_cles": [
+        "C121",
+        "C122",
+        "C124",
+        "C126",
+        "C129",
+        "C131",
+        "C085"
+      ]
     },
     {
       "id": "M35",
       "titre": "Ingénieur efficacité énergétique",
-      "description": "Optimise la consommation énergétique en utilisant la data et l'analyse",
-      "blocs_requis": ["B11", "B08"],
-      "competences_cles": ["C122", "C126", "C128", "C085", "C086", "C093"]
+      "description": "Optimise la consommation énergétique des bâtiments et industries en utilisant la data",
+      "blocs_requis": [
+        "B11",
+        "B08",
+        "B04"
+      ],
+      "competences_cles": [
+        "C122",
+        "C126",
+        "C128",
+        "C085",
+        "C086",
+        "C093",
+        "C039"
+      ]
     },
     {
       "id": "M36",
       "titre": "Ingénieur environnement",
-      "description": "Développe des solutions écologiques et durables pour les entreprises",
-      "blocs_requis": ["B11", "B02"],
-      "competences_cles": ["C121", "C126", "C127", "C013", "C015", "C129"]
+      "description": "Développe des solutions écologiques et durables pour réduire l'impact environnemental",
+      "blocs_requis": [
+        "B11",
+        "B02",
+        "B01"
+      ],
+      "competences_cles": [
+        "C121",
+        "C126",
+        "C127",
+        "C013",
+        "C015",
+        "C129",
+        "C006"
+      ]
     },
     {
       "id": "M37",
       "titre": "Ingénieur automobile",
-      "description": "Conçoit des véhicules et systèmes automobiles innovants incluant l'IA embarquée",
-      "blocs_requis": ["B11", "B09"],
-      "competences_cles": ["C121", "C124", "C125", "C097", "C102", "C130"]
+      "description": "Conçoit des véhicules et systèmes automobiles innovants incluant l'IA embarquée et l'électrique",
+      "blocs_requis": [
+        "B11",
+        "B09",
+        "B10"
+      ],
+      "competences_cles": [
+        "C121",
+        "C124",
+        "C125",
+        "C097",
+        "C102",
+        "C130",
+        "C109"
+      ]
     },
     {
       "id": "M38",
       "titre": "Ingénieur ferroviaire",
-      "description": "Développe les systèmes et infrastructures ferroviaires modernes",
-      "blocs_requis": ["B11"],
-      "competences_cles": ["C121", "C123", "C124", "C126", "C127", "C130"]
+      "description": "Développe les systèmes, infrastructures et solutions d'automatisation ferroviaires modernes",
+      "blocs_requis": [
+        "B11",
+        "B10",
+        "B02"
+      ],
+      "competences_cles": [
+        "C121",
+        "C123",
+        "C124",
+        "C126",
+        "C127",
+        "C130",
+        "C016"
+      ]
     },
     {
       "id": "M39",
       "titre": "Ingénieur aéronautique",
-      "description": "Conçoit des aéronefs et analyse leurs performances avec la data",
-      "blocs_requis": ["B11", "B08"],
-      "competences_cles": ["C121", "C122", "C124", "C085", "C087", "C129"]
+      "description": "Conçoit des aéronefs et systèmes aérospatiaux, analyse leurs performances avec la simulation et la data",
+      "blocs_requis": [
+        "B11",
+        "B08",
+        "B10",
+        "B04"
+      ],
+      "competences_cles": [
+        "C121",
+        "C122",
+        "C124",
+        "C085",
+        "C087",
+        "C129",
+        "C109"
+      ]
     },
     {
       "id": "M40",
       "titre": "Ingénieur systèmes embarqués",
-      "description": "Développe des systèmes électroniques embarqués pour l'industrie et l'automobile",
-      "blocs_requis": ["B11", "B10"],
-      "competences_cles": ["C123", "C125", "C126", "C109", "C114", "C130"]
+      "description": "Développe des systèmes électroniques embarqués temps-réel pour l'industrie, l'automobile et l'IoT",
+      "blocs_requis": [
+        "B11",
+        "B10",
+        "B09",
+        "B01"
+      ],
+      "competences_cles": [
+        "C123",
+        "C125",
+        "C126",
+        "C109",
+        "C114",
+        "C130",
+        "C097"
+      ]
     }
   ]
 }
