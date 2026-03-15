@@ -2,15 +2,6 @@
 Module d'analyse sémantique pour l'orientation professionnelle.
 Utilise SentenceTransformers (bi-encoder multilingue FR) pour le matching compétences/métiers.
 
-CORRECTIONS APPLIQUÉES :
-- [FIX #1] Modèle : all-MiniLM-L6-v2 (EN) → paraphrase-multilingual-mpnet-base-v2 (FR/Multi)
-- [FIX #2] Cross-encoder ms-marco (EN, inadapté) supprimé → pipeline bi-encoder seul
-- [FIX #3] Suppression du BOOST_FACTOR artificiel
-- [FIX #4] Likert → texte sémantique français (phrases spécifiques par domaine)
-- [FIX #5] Scores cosinus bruts conservés (suppression normalisation Min-Max)
-- [FIX #6] Pondération par répétition (query expansion) selon le niveau Likert
-           Débutant=0x, Intermédiaire=1x, Avancé=3x, Expert=5x
-           → les domaines maîtrisés dominent l'embedding final
 """
 
 import json
@@ -21,18 +12,14 @@ import streamlit as st
 from sentence_transformers import SentenceTransformer, util
 
 
-# ============================================================================
+# ____________________________________________________________________________
 # MODÈLES & DONNÉES (CACHE)
-# ============================================================================
+# ____________________________________________________________________________
 
 @st.cache_resource
 def get_models() -> SentenceTransformer:
     """
     Charge le modèle NLP multilingue en cache.
-
-    FIX #1 : paraphrase-multilingual-mpnet-base-v2 supporte nativement le français.
-    FIX #2 : CrossEncoder ms-marco supprimé (entraîné sur requêtes web anglaises,
-             inadapté au matching compétences/profil en français).
     """
     bi_model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
     return bi_model
@@ -70,15 +57,15 @@ def load_and_index_data(json_path: str) -> Tuple[Dict, Dict, List[str], np.ndarr
     return data, comp_index, comp_ids, embeddings
 
 
-# ============================================================================
+# ____________________________________________________________________________
 # CONVERSION LIKERT → TEXTE SÉMANTIQUE PONDÉRÉ
-# ============================================================================
+# ____________________________________________________________________________
 
 # FIX #6 : Pondération par répétition (query expansion)
 # Débutant = exclu (0x) : évite le bruit dans l'embedding
-# Intermédiaire = 1x   : présence neutre
-# Avancé = 3x          : poids fort
-# Expert = 5x          : poids dominant
+# Intermédiaire = 1x    : présence neutre
+# Avancé = 3x           : poids fort
+# Expert = 5x           : poids dominant
 LIKERT_REPETITIONS = {
     "Débutant":      0,
     "Intermédiaire": 1,
@@ -86,17 +73,15 @@ LIKERT_REPETITIONS = {
     "Expert":        5,
 }
 
-# FIX #4 : Phrases spécifiques par domaine, riches du vocabulaire du référentiel
-# (bien plus efficaces que des phrases génériques comme "j'ai un niveau avancé")
 DOMAINE_PHRASES = {
-    # --- business : vocabulaire exact du bloc B02 du référentiel ---
+    #  business : vocabulaire exact du bloc B02 du référentiel 
     "business": (
         "Je maîtrise la stratégie d'entreprise et la définition de business models innovants. "
         "Je réalise des analyses de marché, des études de faisabilité technique et financière. "
         "Je pilote des projets complexes avec méthodes agiles, je conduis des analyses concurrentielles "
         "et j'accompagne le changement et les transformations organisationnelles."
     ),
-    # --- juridique : vocabulaire exact du bloc B01 du référentiel ---
+    #  juridique : vocabulaire exact du bloc B01 du référentiel 
     # Clé spéciale utilisée uniquement dans les profils de test Juriste
     "juridique": (
         "Je maîtrise le droit des affaires, le droit commercial et le droit du travail. "
@@ -106,7 +91,7 @@ DOMAINE_PHRASES = {
         "J'effectue une veille réglementaire et juridique continue. "
         "Je protège la propriété intellectuelle et gère les procédures de contentieux."
     ),
-    # --- finance : vocabulaire exact du bloc B04 ---
+    #  finance : vocabulaire exact du bloc B04 
     "finance": (
         "Je maîtrise la comptabilité générale et analytique en normes françaises et IFRS. "
         "Je réalise des analyses financières et diagnostics économiques approfondis. "
@@ -114,7 +99,7 @@ DOMAINE_PHRASES = {
         "Je crée des tableaux de bord financiers pour le pilotage décisionnel. "
         "Je gère la trésorerie et évalue la rentabilité des investissements."
     ),
-    # --- design : vocabulaire exact du bloc B06 ---
+    #  design : vocabulaire exact du bloc B06 
     "design": (
         "Je maîtrise le design graphique et la création d'identité visuelle complète. "
         "J'assure la direction artistique de projets créatifs complexes. "
@@ -123,7 +108,7 @@ DOMAINE_PHRASES = {
         "Je maîtrise la suite Adobe Photoshop Illustrator InDesign et Figma. "
         "Je développe mon sens esthétique, je pratique les arts visuels et j'aime le dessin."
     ),
-    # --- communication : vocabulaire exact du bloc B05 + B07 ---
+    #  communication : vocabulaire exact du bloc B05 + B07 
     "communication": (
         "Je maîtrise la communication corporate et la stratégie de communication interne et externe. "
         "Je gère les relations publiques, les relations avec la presse et les situations de crise médiatique. "
@@ -134,7 +119,7 @@ DOMAINE_PHRASES = {
         "Je développe des stratégies d'influence marketing et partenariats créateurs. "
         "J'optimise le référencement SEO et SEA et gère des campagnes publicitaires en ligne."
     ),
-    # --- data_analysis : vocabulaire exact du bloc B08 ---
+    #  data_analysis : vocabulaire exact du bloc B08 
     "data_analysis": (
         "Je programme en Python ou R pour l'analyse de données avec Pandas NumPy. "
         "Je maîtrise SQL pour interroger et manipuler des bases de données. "
@@ -144,7 +129,7 @@ DOMAINE_PHRASES = {
         "Je crée des dashboards interactifs pour le pilotage décisionnel. "
         "Je réalise des analyses exploratoires EDA et interprète les résultats statistiques."
     ),
-    # --- ml : vocabulaire exact du bloc B09 ---
+    #  ml : vocabulaire exact du bloc B09 
     "ml": (
         "Je développe et entraîne des algorithmes de machine learning supervisé et non supervisé. "
         "Je conçois des réseaux de neurones profonds pour le deep learning. "
@@ -154,7 +139,7 @@ DOMAINE_PHRASES = {
         "Je déploie des modèles d'IA en production avec MLOps. "
         "J'optimise les hyperparamètres et évalue les performances des modèles."
     ),
-    # --- dev : vocabulaire exact du bloc B10 ---
+    #  dev : vocabulaire exact du bloc B10 
     "dev": (
         "Je programme en Python Java JavaScript avec les bonnes pratiques. "
         "Je développe des API REST robustes et scalables avec Flask Django FastAPI. "
@@ -163,7 +148,7 @@ DOMAINE_PHRASES = {
         "Je déploie des infrastructures cloud AWS Azure GCP. "
         "J'utilise Git Docker et Kubernetes pour la conteneurisation et l'orchestration."
     ),
-    # --- engineering : vocabulaire exact du bloc B11 ---
+    #  engineering : vocabulaire exact du bloc B11 
     "engineering": (
         "Je conçois des systèmes mécaniques complexes et innovants. "
         "J'applique les principes de thermodynamique et énergétique. "
@@ -178,9 +163,6 @@ DOMAINE_PHRASES = {
 def likert_to_semantic_text(levels: Dict[str, str]) -> str:
     """
     Convertit les niveaux Likert en texte sémantique pondéré par répétition.
-
-    FIX #4 + #6 : Query expansion — les domaines Avancé/Expert sont répétés
-    3x/5x pour dominer l'embedding. Les domaines Débutant sont exclus (bruit=0).
 
     Args:
         levels: Dict {clé_domaine: niveau_likert}
@@ -202,31 +184,26 @@ def likert_to_semantic_text(levels: Dict[str, str]) -> str:
     return " ".join(parts)
 
 
-# ============================================================================
+# ____________________________________________________________________________
 # ANALYSE SÉMANTIQUE
-# ============================================================================
+# ____________________________________________________________________________
 
 def analyze_profile(
         user_text: str,
         bi_model: SentenceTransformer,
         comp_ids: List[str],
         comp_embeddings: np.ndarray,
-        cross_model,           # Conservé pour compatibilité de signature, non utilisé
+        cross_model,           # non utilisé
         comp_index: Dict,
         top_k: int = None
 ) -> Dict[str, float]:
     """
     Analyse le profil utilisateur et calcule les scores de match par compétence.
 
-    Pipeline corrigé :
+    Pipeline :
     1. Bi-encoder multilingue : embedding sémantique du profil en français
     2. Recherche sémantique sur TOUTES les compétences (top_k=None)
-    3. Scores cosinus bruts conservés sans normalisation Min-Max (FIX #5)
-
-    FIX #5 : Suppression de la normalisation Min-Max qui forçait artificiellement
-    le meilleur score à 100% et le pire à 0%, rendant tous les profils identiques
-    en plage de scores et empêchant la discrimination entre domaines.
-
+    3. Scores cosinus bruts conservés sans normalisation Min-Max
     Args:
         user_text    : Description du profil utilisateur
         bi_model     : Modèle d'embedding multilingue
@@ -252,7 +229,7 @@ def analyze_profile(
     print(f"  - Scores cosinus bruts: min={min(raw_scores):.3f}, max={max(raw_scores):.3f}")
     print(f"  - Compétences analysées: {len(raw_scores)}/{len(comp_ids)}")
 
-    # FIX #5 : scores cosinus bruts, clip à 0 minimum
+    #scores cosinus bruts
     result = {
         candidate_ids[idx]: float(max(0.0, raw_scores[idx]))
         for idx in range(len(candidate_ids))
@@ -266,9 +243,9 @@ def analyze_profile(
     return result
 
 
-# ============================================================================
+# ____________________________________________________________________________
 # RECOMMANDATION MÉTIERS
-# ============================================================================
+# ____________________________________________________________________________
 
 def recommend_jobs(
     comp_scores: Dict[str, float],
@@ -278,11 +255,10 @@ def recommend_jobs(
     """
     Recommande les métiers les plus adaptés au profil utilisateur.
 
-    FIX #7 : Moyenne pondérée par rang des blocs requis.
+    Moyenne pondérée par rang des blocs requis.
     Le 1er bloc requis d'un métier compte 4x plus que le 3ème.
-    Différencie Data Scientist (B09 en rang 1) de Full Stack (B10 en rang 1).
 
-    FIX #8 : Bonus compétences clés (30% du score final).
+    Bonus compétences clés 30% du score final.
     Affine le classement entre métiers ayant les mêmes blocs.
 
     Poids par rang :
@@ -318,7 +294,7 @@ def recommend_jobs(
         if not bloc_ids:
             continue
 
-        # FIX #7 : Moyenne pondérée par rang
+        # Moyenne pondérée par rang
         total_weight = 0.0
         weighted_sum = 0.0
         for rank, bid in enumerate(bloc_ids):
@@ -327,7 +303,7 @@ def recommend_jobs(
             total_weight += weight
         base_score = weighted_sum / total_weight if total_weight > 0 else 0.0
 
-        # FIX #8 : Bonus compétences clés
+        # Bonus compétences clés
         cles = job.get('competences_cles', [])
         bonus = float(np.mean([comp_scores.get(cid, 0.0) for cid in cles])) * 0.3 if cles else 0.0
 
