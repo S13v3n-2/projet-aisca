@@ -1,15 +1,6 @@
 """
 Interface Streamlit - AISCA v2.2
 Questionnaire adapté au référentiel de 11 blocs et 40 métiers
-
-CORRECTIONS APPLIQUÉES :
-- [FIX #4] Conversion des niveaux Likert en texte sémantique français via likert_to_semantic_text()
-  Avant : "Data Analysis Avancé, ML Intermédiaire" (incompréhensible pour le modèle)
-  Après : "Concernant l'analyse de données : J'ai un niveau avancé, je maîtrise les concepts complexes..."
-- [FIX #1] Import get_models mis à jour (retourne maintenant un seul modèle, plus de cross_model)
-- [FIX #2] Passage de cross_model=None dans analyze_profile (signature conservée pour compatibilité)
-- [FIX #6] Profil de test recalibré : data_analysis/ml=Expert, tout le reste=Débutant
-- [FIX #7] Remplacement use_container_width → width= (déprécié Streamlit)
 """
 # streamlit run src/visualisations.py
 import streamlit as st
@@ -26,8 +17,8 @@ from genai_augmentation import enrich_short_text, generate_learning_path, genera
 # ============================================================================
 
 st.set_page_config(
-    page_title="AISCA - Orientation IA",
-    page_icon="🎯",
+    page_title="AISCA - Orientation Professionnelle",
+    page_icon="favicon.ico",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -42,17 +33,15 @@ DATA_PATH = "data/referentiel.json"
 @st.cache_resource
 def initialize_app():
     try:
-        # CORRECTION #1 : get_models() retourne maintenant un seul modèle (bi_model uniquement)
-        # Le cross_model anglais a été supprimé car inadapté au français
         bi_model = get_models()
         data, comp_idx, comp_ids, embeddings = load_and_index_data(DATA_PATH)
         return bi_model, data, comp_idx, comp_ids, embeddings
     except Exception as e:
-        st.error(f"❌ Erreur d'initialisation : {e}")
+        st.error(f"Erreur d'initialisation : {e}")
         st.stop()
 
 
-with st.spinner("🔄 Chargement du modèle NLP multilingue..."):
+with st.spinner("Chargement du modèle NLP..."):
     bi_model, data, comp_idx, comp_ids, embeddings = initialize_app()
 
 
@@ -62,29 +51,29 @@ with st.spinner("🔄 Chargement du modèle NLP multilingue..."):
 
 with st.sidebar:
     st.image("src/visuel/img/projet_IA_Generative.png", width="stretch")
-    st.header("ℹ️ Agent RAG Intelligent")
+    st.header("Agent RAG Intelligent")
     st.markdown("""
     **Pipeline d'analyse :**
-    1. 🔍 **Retrieval** : Matching sémantique SBERT multilingue
-    2. 🧠 **Augmentation** : Enrichissement GenAI
-    3. 📊 **Generation** : Recommandations personnalisées
-    
-    **11 blocs de compétences**  
-    **40 métiers analysés**  
-    **200+ compétences indexées**
+    1. Retrieval : Matching sémantique SBERT multilingue
+    2. Augmentation : Enrichissement GenAI
+    3. Generation : Recommandations personnalisées
+
+    11 blocs de compétences  
+    40 métiers analysés  
+    200+ compétences indexées
     """)
 
     st.divider()
-    st.caption("**Stack technique :**")
+    st.caption("Stack technique :")
     st.code("NLP: paraphrase-multilingual-mpnet-base-v2\nGenAI: Gemini 2.5 Flash", language="text")
 
 with st.sidebar:
     st.divider()
-    st.header("🧪 Profils de Test")
+    st.header("Profils de Test")
     st.caption("Cliquez pour remplir automatiquement le formulaire")
 
-    # ── PROFIL 1 : Data Scientist ─────────────────────────────────────────
-    if st.button("🤖 Data Scientist", width="stretch"):
+    # Profil 1 : Data Scientist
+    if st.button("Data Scientist", width="stretch"):
         st.session_state.update({
             "business":      "Débutant",
             "finance":       "Débutant",
@@ -115,8 +104,8 @@ with st.sidebar:
         })
         st.rerun()
 
-    # ── PROFIL 2 : Marketing / Communication ─────────────────────────────
-    if st.button("📢 Marketing / Communication", width="stretch"):
+    # Profil 2 : Marketing / Communication
+    if st.button("Marketing / Communication", width="stretch"):
         st.session_state.update({
             "business":      "Intermédiaire",
             "finance":       "Débutant",
@@ -147,8 +136,8 @@ with st.sidebar:
         })
         st.rerun()
 
-    # ── PROFIL 3 : Designer / Créatif ────────────────────────────────────
-    if st.button("🎨 Designer / Créatif", width="stretch"):
+    # Profil 3 : Designer / Créatif
+    if st.button("Designer / Créatif", width="stretch"):
         st.session_state.update({
             "business":      "Débutant",
             "finance":       "Débutant",
@@ -179,10 +168,8 @@ with st.sidebar:
         })
         st.rerun()
 
-    # ── PROFIL 4 : Juriste / Consultant ──────────────────────────────────
-    # NOTE : utilise la clé "juridique" (bloc B01) + "business" pour le scoring
-    # La clé "juridique" est gérée dans likert_levels_extra côté visualisations
-    if st.button("⚖️ Juriste / Consultant", width="stretch"):
+    # Profil 4 : Juriste / Consultant
+    if st.button("Juriste / Consultant", width="stretch"):
         st.session_state.update({
             "business":      "Intermédiaire",
             "finance":       "Intermédiaire",
@@ -192,7 +179,6 @@ with st.sidebar:
             "ml":            "Débutant",
             "dev":           "Débutant",
             "engineering":   "Débutant",
-            # Clé spéciale pour injecter le vocabulaire juridique B01
             "_juridique_level": "Expert",
             "rigueur":    "Rigoureux et attentif aux détails",
             "leadership": "Je prends naturellement le lead",
@@ -220,47 +206,44 @@ with st.sidebar:
 # INTERFACE PRINCIPALE
 # ============================================================================
 
-st.title("🎯 AISCA - Agent Intelligent de Cartographie des Compétences")
+st.title("AISCA - Agent Intelligent de Cartographie des Compétences")
 st.markdown("*Analyse sémantique avancée pour l'orientation professionnelle*")
 
 st.divider()
 
 # ============================================================================
-# QUESTIONNAIRE HYBRIDE
+# QUESTIONNAIRE
 # ============================================================================
 
-st.header("📝 Questionnaire d'Évaluation des Compétences")
+st.header("Questionnaire d'évaluation des compétences")
 st.markdown("Répondez aux questions suivantes pour obtenir votre profil personnalisé.")
 
 with st.form(key="questionnaire_complet"):
 
-    # === SECTION 1 : DOMAINES D'INTÉRÊT ===
-    st.subheader("1️⃣ Vos domaines d'intérêt professionnels")
+    # Section 1 : Domaines d'intérêt
+    st.subheader("1. Vos domaines d'intérêt professionnels")
     st.caption("Sélectionnez tous les domaines qui vous attirent")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
         domaines_col1 = st.multiselect(
-            "Domaines business & juridique :",
-            ["Juridique", "Business et Stratégie", "Marketing et Vente",
-             "Finance et Comptabilité"],
+            "Domaines business et juridique :",
+            ["Juridique", "Business et Stratégie", "Marketing et Vente", "Finance et Comptabilité"],
             help="Compétences en droit, stratégie, commerce et finance"
         )
 
     with col2:
         domaines_col2 = st.multiselect(
-            "Domaines créatifs & communication :",
-            ["Communication et Médias", "Création et Design",
-             "Digital et Réseaux Sociaux"],
+            "Domaines créatifs et communication :",
+            ["Communication et Médias", "Création et Design", "Digital et Réseaux Sociaux"],
             help="Compétences en communication, design et social media"
         )
 
     with col3:
         domaines_col3 = st.multiselect(
-            "Domaines techniques & data :",
-            ["Data Analysis", "Machine Learning et IA",
-             "Développement et Infrastructure", "Ingénierie et Technique"],
+            "Domaines techniques et data :",
+            ["Data Analysis", "Machine Learning et IA", "Développement et Infrastructure", "Ingénierie et Technique"],
             help="Compétences en data, IA, développement et ingénierie"
         )
 
@@ -268,14 +251,14 @@ with st.form(key="questionnaire_complet"):
 
     st.divider()
 
-    # === SECTION 2 : AUTO-ÉVALUATION (Likert) ===
-    st.subheader("2️⃣ Auto-évaluation de vos compétences techniques")
+    # Section 2 : Auto-évaluation
+    st.subheader("2. Auto-évaluation de vos compétences techniques")
     st.caption("Évaluez honnêtement votre niveau actuel dans chaque domaine")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.markdown("**💼 Business & Stratégie**")
+        st.markdown("**Business et Stratégie**")
         business_level = st.select_slider(
             "Stratégie d'entreprise",
             options=["Débutant", "Intermédiaire", "Avancé", "Expert"],
@@ -283,29 +266,29 @@ with st.form(key="questionnaire_complet"):
             key="business"
         )
         finance_level = st.select_slider(
-            "Finance / Comptabilité",
+            "Finance et Comptabilité",
             options=["Débutant", "Intermédiaire", "Avancé", "Expert"],
             value="Débutant",
             key="finance"
         )
 
     with col2:
-        st.markdown("**🎨 Créativité & Communication**")
+        st.markdown("**Créativité et Communication**")
         design_level = st.select_slider(
-            "Design / Créativité",
+            "Design et Créativité",
             options=["Débutant", "Intermédiaire", "Avancé", "Expert"],
             value="Débutant",
             key="design"
         )
         communication_level = st.select_slider(
-            "Communication / Média",
+            "Communication et Média",
             options=["Débutant", "Intermédiaire", "Avancé", "Expert"],
             value="Débutant",
             key="communication"
         )
 
     with col3:
-        st.markdown("**📊 Data & Analyse**")
+        st.markdown("**Data et Analyse**")
         data_analysis_level = st.select_slider(
             "Analyse de données",
             options=["Débutant", "Intermédiaire", "Avancé", "Expert"],
@@ -313,14 +296,14 @@ with st.form(key="questionnaire_complet"):
             key="data_analysis"
         )
         ml_level = st.select_slider(
-            "Machine Learning / IA",
+            "Machine Learning et IA",
             options=["Débutant", "Intermédiaire", "Avancé", "Expert"],
             value="Débutant",
             key="ml"
         )
 
     with col4:
-        st.markdown("**💻 Développement & Tech**")
+        st.markdown("**Développement et Tech**")
         dev_level = st.select_slider(
             "Développement logiciel",
             options=["Débutant", "Intermédiaire", "Avancé", "Expert"],
@@ -336,53 +319,45 @@ with st.form(key="questionnaire_complet"):
 
     st.divider()
 
-    # === SECTION 3 : SOFT SKILLS ===
-    st.subheader("3️⃣ Vos traits de personnalité et soft skills")
+    # Section 3 : Soft skills
+    st.subheader("3. Traits de personnalité et soft skills")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("**🧠 Style de travail**")
+        st.markdown("**Style de travail**")
         rigoeur = st.radio(
             "Vous êtes plutôt :",
-            ["Rigoureux et attentif aux détails",
-             "Créatif et improvisateur",
-             "Équilibré entre les deux"],
+            ["Rigoureux et attentif aux détails", "Créatif et improvisateur", "Équilibré entre les deux"],
             key="rigueur"
         )
         leadership = st.radio(
             "Face à un projet d'équipe :",
-            ["Je prends naturellement le lead",
-             "Je préfère contribuer en tant que membre",
-             "Cela dépend du contexte"],
+            ["Je prends naturellement le lead", "Je préfère contribuer en tant que membre", "Cela dépend du contexte"],
             key="leadership"
         )
 
     with col2:
-        st.markdown("**💡 Compétences relationnelles**")
+        st.markdown("**Compétences relationnelles**")
         persuasion = st.radio(
             "Aimez-vous débattre et convaincre ?",
-            ["Oui, j'adore argumenter et persuader",
-             "Non, je préfère éviter les confrontations",
-             "Parfois, selon le sujet"],
+            ["Oui, j'adore argumenter et persuader", "Non, je préfère éviter les confrontations", "Parfois, selon le sujet"],
             key="persuasion"
         )
         empathie = st.radio(
             "Dans vos relations professionnelles :",
-            ["Je suis très empathique et à l'écoute",
-             "Je privilégie l'efficacité sur l'émotion",
-             "Je trouve un équilibre"],
+            ["Je suis très empathique et à l'écoute", "Je privilégie l'efficacité sur l'émotion", "Je trouve un équilibre"],
             key="empathie"
         )
 
     st.divider()
 
-    # === SECTION 4 : QUESTIONS OUVERTES ===
-    st.subheader("4️⃣ Vos expériences et aspirations")
+    # Section 4 : Questions ouvertes
+    st.subheader("4. Expériences et aspirations")
     st.caption("Détaillez vos réponses pour une analyse plus précise")
 
     projet_tech = st.text_area(
-        "🚀 Décrivez un projet technique ou professionnel dont vous êtes fier :",
+        "Décrivez un projet technique ou professionnel dont vous êtes fier :",
         placeholder="Ex : J'ai développé un dashboard Power BI pour analyser les ventes en temps réel...",
         height=120,
         key="projet"
@@ -392,13 +367,13 @@ with st.form(key="questionnaire_complet"):
 
     with col1:
         journee_ideale = st.text_area(
-            "☀️ Décrivez votre journée de travail idéale :",
+            "Décrivez votre journée de travail idéale :",
             placeholder="Ex : Alterner entre analyse de données, réunions stratégiques...",
             height=100,
             key="journee"
         )
         interet_specifique = st.text_area(
-            "💼 Domaines spécifiques qui vous passionnent :",
+            "Domaines spécifiques qui vous passionnent :",
             placeholder="Ex : L'éthique de l'IA, l'optimisation énergétique...",
             height=100,
             key="interet"
@@ -406,13 +381,13 @@ with st.form(key="questionnaire_complet"):
 
     with col2:
         defis_aimes = st.text_area(
-            "💡 Types de défis qui vous stimulent :",
+            "Types de défis qui vous stimulent :",
             placeholder="Ex : Résoudre des problèmes complexes avec la data...",
             height=100,
             key="defis"
         )
         objectif_carriere = st.text_area(
-            "🎯 Objectif de carrière à 3-5 ans :",
+            "Objectif de carrière à 3-5 ans :",
             placeholder="Ex : Devenir Lead Data Scientist dans une fintech...",
             height=100,
             key="objectif"
@@ -420,70 +395,64 @@ with st.form(key="questionnaire_complet"):
 
     st.divider()
 
-    # === SECTION 5 : OUTILS & TECHNOLOGIES ===
-    st.subheader("5️⃣ Outils et technologies maîtrisés")
+    # Section 5 : Outils
+    st.subheader("5. Outils et technologies maîtrisés")
 
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("**📊 Data & Analytics**")
+        st.markdown("**Data et Analytics**")
         outils_data = st.multiselect(
             "Outils maîtrisés :",
-            ["Python", "R", "SQL", "Excel avancé", "Pandas", "NumPy",
-             "Matplotlib", "Seaborn", "Plotly", "Tableau", "Power BI"],
+            ["Python", "R", "SQL", "Excel avancé", "Pandas", "NumPy", "Matplotlib", "Seaborn", "Plotly", "Tableau", "Power BI"],
             key="outils_data"
         )
 
     with col2:
-        st.markdown("**🤖 IA & Machine Learning**")
+        st.markdown("**IA et Machine Learning**")
         outils_ml = st.multiselect(
             "Frameworks IA :",
-            ["Scikit-learn", "TensorFlow", "PyTorch", "Keras",
-             "HuggingFace", "LangChain", "OpenAI API", "BERT", "GPT"],
+            ["Scikit-learn", "TensorFlow", "PyTorch", "Keras", "HuggingFace", "LangChain", "OpenAI API", "BERT", "GPT"],
             key="outils_ml"
         )
 
     with col3:
-        st.markdown("**💻 Développement & Cloud**")
+        st.markdown("**Développement et Cloud**")
         outils_dev = st.multiselect(
             "Stack technique :",
-            ["Git", "Docker", "Kubernetes", "AWS", "Azure", "GCP",
-             "Flask", "Django", "FastAPI", "React", "Node.js", "MongoDB"],
+            ["Git", "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Flask", "Django", "FastAPI", "React", "Node.js", "MongoDB"],
             key="outils_dev"
         )
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.markdown("**🎨 Design & Créativité**")
+        st.markdown("**Design et Créativité**")
         outils_design = st.multiselect(
             "Suite créative :",
-            ["Photoshop", "Illustrator", "InDesign", "Figma", "Canva",
-             "After Effects", "Premiere Pro", "Sketch"],
+            ["Photoshop", "Illustrator", "InDesign", "Figma", "Canva", "After Effects", "Premiere Pro", "Sketch"],
             key="outils_design"
         )
 
     with col2:
-        st.markdown("**📱 Marketing & Communication**")
+        st.markdown("**Marketing et Communication**")
         outils_marketing = st.multiselect(
             "Outils marketing :",
-            ["Google Analytics", "Meta Business Suite", "Google Ads",
-             "SEMrush", "Mailchimp", "HubSpot", "Hootsuite", "Buffer"],
+            ["Google Analytics", "Meta Business Suite", "Google Ads", "SEMrush", "Mailchimp", "HubSpot", "Hootsuite", "Buffer"],
             key="outils_marketing"
         )
 
     st.divider()
 
-    # === SECTION 6 : EXPÉRIENCE & FORMATION ===
-    st.subheader("6️⃣ Parcours et expérience")
+    # Section 6 : Parcours
+    st.subheader("6. Parcours et expérience")
 
     col1, col2 = st.columns(2)
 
     with col1:
         niveau_etudes = st.selectbox(
             "Niveau d'études :",
-            ["Bac", "Bac+2 (BTS/DUT)", "Bac+3 (Licence)",
-             "Bac+5 (Master)", "Bac+8 (Doctorat)", "Autre"],
+            ["Bac", "Bac+2 (BTS/DUT)", "Bac+3 (Licence)", "Bac+5 (Master)", "Bac+8 (Doctorat)", "Autre"],
             key="etudes"
         )
         domaine_formation = st.text_input(
@@ -499,27 +468,22 @@ with st.form(key="questionnaire_complet"):
             key="experience"
         )
         secteur_actuel = st.text_input(
-            "Secteur d'activité actuel/récent :",
+            "Secteur d'activité actuel ou récent :",
             placeholder="Ex : Banque, E-commerce, Conseil, Startup tech...",
             key="secteur"
         )
 
     st.divider()
 
-    # === SUBMISSION ===
-    submit = st.form_submit_button("🚀 Analyser mon profil complet", width="stretch", type="primary")
+    submit = st.form_submit_button("Analyser mon profil", width="stretch", type="primary")
 
 
 # ============================================================================
-# TRAITEMENT & ANALYSE
+# TRAITEMENT ET ANALYSE
 # ============================================================================
 
 if submit:
 
-    # CORRECTION #4 + #6 : Conversion Likert → texte sémantique pondéré
-    # Les domaines Avancé/Expert sont répétés 3x/5x pour dominer l'embedding.
-    # La clé "juridique" est injectée si le profil de test Juriste est sélectionné
-    # (stockée dans session_state sous "_juridique_level").
     likert_levels = {
         "business":      business_level,
         "finance":       finance_level,
@@ -530,7 +494,7 @@ if submit:
         "dev":           dev_level,
         "engineering":   engineering_level,
     }
-    # Injection du niveau juridique si présent (profil Juriste)
+
     juridique_level = st.session_state.get("_juridique_level", None)
     if juridique_level:
         likert_levels["juridique"] = juridique_level
@@ -551,15 +515,10 @@ if submit:
     Expérience : {annees_experience} dans le secteur {secteur_actuel}.
     """
 
-    # Domaines d'intérêt enrichis sémantiquement
     domaines_text = f"Je m'intéresse aux domaines suivants : {', '.join(domaines)}." if domaines else ""
+    outils_text   = f"Je maîtrise les outils et technologies suivants : {', '.join(outils_all)}." if outils_all else ""
 
-    # Outils enrichis sémantiquement
-    outils_text = f"Je maîtrise les outils et technologies suivants : {', '.join(outils_all)}." if outils_all else ""
-
-    # Injection directe des compétences du bloc B01 pour le profil Juriste
-    # Nécessaire car le modèle place B01 sémantiquement proche de B02 (Business).
-    # La répétition 5x du texte juridique exact du référentiel force le matching.
+    # Injection directe des compétences B01 pour le profil Juriste
     juridique_boost = ""
     if st.session_state.get("_juridique_level") in ("Expert", "Avancé"):
         repetitions = 5 if st.session_state.get("_juridique_level") == "Expert" else 3
@@ -579,7 +538,7 @@ if submit:
 
     user_text = " ".join([
         domaines_text,
-        juridique_boost,         # ← Compétences B01 injectées directement (x3 ou x5)
+        juridique_boost,
         likert_summary,
         soft_skills_summary,
         projet_tech,
@@ -592,42 +551,35 @@ if submit:
     ]).strip()
 
     if len(user_text.split()) < 30:
-        st.warning("⚠️ Réponses trop courtes. Veuillez détailler davantage vos expériences et aspirations pour une analyse fiable.")
+        st.warning("Réponses trop courtes. Veuillez détailler davantage vos expériences et aspirations pour une analyse fiable.")
     else:
-        # === ÉTAPE 1 : Enrichissement GenAI conditionnel ===
-        with st.spinner("🔍 Prétraitement sémantique avec GenAI..."):
-            enriched_projet = enrich_short_text(projet_tech) if len(projet_tech.split()) < 15 else projet_tech
+        with st.spinner("Prétraitement sémantique en cours..."):
+            enriched_projet  = enrich_short_text(projet_tech)       if len(projet_tech.split()) < 15       else projet_tech
             enriched_interet = enrich_short_text(interet_specifique) if len(interet_specifique.split()) < 10 else interet_specifique
-
             final_text = user_text.replace(projet_tech, enriched_projet).replace(interet_specifique, enriched_interet)
 
-        # === ÉTAPE 2 : Analyse sémantique ===
-        with st.spinner("🧠 Analyse NLP sémantique en cours..."):
-            # CORRECTION #2 : cross_model=None (cross-encoder anglais supprimé)
-            # CORRECTION #5 : top_k=None → toutes les compétences analysées,
-            # scores cosinus bruts conservés sans normalisation Min-Max
+        with st.spinner("Analyse sémantique en cours..."):
             comp_scores = analyze_profile(
                 final_text, bi_model, comp_ids, embeddings,
                 None, comp_idx, top_k=None
             )
-
             top_jobs, bloc_scores = recommend_jobs(comp_scores, data, top_n=3)
 
-        st.success("✅ Analyse terminée avec succès !")
+        st.success("Analyse terminée.")
 
-        # === AFFICHAGE DES RÉSULTATS ===
+        # ---- Résultats ----
         st.divider()
-        st.header("🏆 Vos Résultats Personnalisés")
+        st.header("Résultats")
 
         col1, col2, col3 = st.columns(3)
 
         with col1:
             overall_score = top_jobs[0]['score'] if top_jobs else 0
-            st.metric("Score de Match #1", f"{overall_score:.0%}")
+            st.metric("Score de match", f"{overall_score:.0%}")
 
         with col2:
             nb_comp_fortes = sum(1 for b in top_jobs[0]['blocs'] if b['score'] >= 0.7)
-            st.metric("Blocs Maîtrisés", f"{nb_comp_fortes}/{len(top_jobs[0]['blocs'])}")
+            st.metric("Blocs maîtrisés", f"{nb_comp_fortes}/{len(top_jobs[0]['blocs'])}")
 
         with col3:
             potentiel = "Excellent" if overall_score >= 0.75 else "Très bon" if overall_score >= 0.6 else "Bon"
@@ -635,10 +587,10 @@ if submit:
 
         st.divider()
 
-        # === TABS DES MÉTIERS RECOMMANDÉS ===
-        st.subheader("🎯 Top 3 des métiers recommandés")
+        # ---- Top 3 métiers ----
+        st.subheader("Top 3 des métiers recommandés")
 
-        tabs = st.tabs([f"#{i + 1} {job['titre']} ({job['score']:.0%})" for i, job in enumerate(top_jobs)])
+        tabs = st.tabs([f"#{i+1}  {job['titre']}  ({job['score']:.0%})" for i, job in enumerate(top_jobs)])
 
         for i, (tab, job) in enumerate(zip(tabs, top_jobs)):
             with tab:
@@ -667,7 +619,7 @@ if submit:
                                 textposition='auto',
                             ))
                             fig.update_layout(
-                                title=f"Adéquation par bloc : {job['titre']}",
+                                title=f"Adéquation par bloc - {job['titre']}",
                                 xaxis=dict(range=[0, 1], tickformat='.0%'),
                                 yaxis=dict(autorange="reversed"),
                                 height=300,
@@ -707,34 +659,34 @@ if submit:
                                 showlegend=False,
                                 height=450,
                                 margin=dict(l=80, r=80, t=60, b=40),
-                                title=f"Cartographie des compétences : {job['titre']}"
+                                title=f"Cartographie des compétences - {job['titre']}"
                             )
 
                         st.plotly_chart(fig, width="stretch")
 
                 with col2:
-                    st.metric("Score Global", f"{global_score:.0%}")
+                    st.metric("Score global", f"{global_score:.0%}")
 
                     if i < len(top_jobs) - 1:
-                        delta = global_score - float(top_jobs[i + 1]['score'])
-                        st.metric("Écart avec #" + str(i + 2), f"+{delta:.1%}")
+                        delta = global_score - float(top_jobs[i+1]['score'])
+                        st.metric(f"Écart avec #{i+2}", f"+{delta:.1%}")
 
                     st.write("---")
-                    with st.expander("📊 Détail des blocs", expanded=True):
+                    with st.expander("Détail des blocs", expanded=True):
                         for bloc in job['blocs']:
                             b_score = float(bloc['score'])
                             st.write(f"**{bloc['nom']}**")
                             st.progress(max(0.0, min(1.0, b_score)))
                             st.caption(f"Adéquation : {b_score:.0%}")
 
-        # === GÉNÉRATION PLAN + BIO (RAG - Generation) ===
+        # ---- Recommandations stratégiques ----
         st.divider()
-        st.header("🎯 Recommandations Stratégiques")
+        st.header("Recommandations")
 
         col1, col2 = st.columns([3, 2])
 
         with col1:
-            st.subheader("📚 Plan de Progression Personnalisé")
+            st.subheader("Plan de progression")
 
             weak_blocs = {
                 b['nom']: b['score']
@@ -743,7 +695,7 @@ if submit:
             }
 
             if weak_blocs:
-                with st.spinner("🤖 Génération du plan avec IA générative..."):
+                with st.spinner("Génération du plan personnalisé..."):
                     learning_path = generate_learning_path(
                         weak_blocs,
                         top_jobs[0]['titre'],
@@ -751,10 +703,10 @@ if submit:
                     )
                 st.markdown(learning_path)
             else:
-                st.success("🎉 Félicitations ! Vous maîtrisez déjà tous les blocs requis pour ce métier.")
+                st.success("Vous maîtrisez déjà tous les blocs requis pour ce métier.")
 
         with col2:
-            st.subheader("💼 Votre Bio Professionnelle")
+            st.subheader("Synthèse de profil")
 
             strong_blocs = {
                 b['nom']: b['score']
@@ -762,35 +714,35 @@ if submit:
                 if b['score'] >= 0.6
             }
 
-            with st.spinner("✍️ Rédaction de votre bio..."):
+            with st.spinner("Rédaction de la synthèse..."):
                 bio = generate_professional_bio(
                     strong_blocs,
                     top_jobs[0]['titre'],
                     {
-                        "projet_tech": projet_tech,
+                        "projet_tech":    projet_tech,
                         "journee_ideale": journee_ideale,
-                        "objectif": objectif_carriere
+                        "objectif":       objectif_carriere
                     }
                 )
 
             st.info(bio)
             st.download_button(
-                "📥 Télécharger ma bio",
+                "Télécharger ma synthèse",
                 bio,
-                file_name="bio_professionnelle_aisca.txt",
+                file_name="synthese_aisca.txt",
                 mime="text/plain",
                 width="stretch"
             )
 
-        # === TABLEAU RÉCAPITULATIF ===
+        # ---- Tableau récapitulatif ----
         st.divider()
-        st.subheader("📊 Tableau récapitulatif de vos scores")
+        st.subheader("Tableau récapitulatif")
 
         df_scores = pd.DataFrame([
             {
                 "Bloc de compétences": b['nom'],
                 "Score": f"{b['score']:.0%}",
-                "Niveau": "🟢 Maîtrisé" if b['score'] >= 0.7 else "🟡 Intermédiaire" if b['score'] >= 0.4 else "🔴 À développer"
+                "Niveau": "Maîtrisé" if b['score'] >= 0.7 else "Intermédiaire" if b['score'] >= 0.4 else "A développer"
             }
             for b in top_jobs[0]['blocs']
         ]).sort_values("Score", ascending=False)
@@ -799,36 +751,33 @@ if submit:
 
         st.balloons()
 
-        # === DEBUG ===
-        with st.expander("🔍 DEBUG : Texte utilisateur généré", expanded=False):
+        # ---- DEBUG ----
+        with st.expander("DEBUG - Texte utilisateur généré", expanded=False):
             st.text_area("Texte complet envoyé à l'analyse :", user_text, height=200)
-            st.write(f"**Nombre de mots :** {len(user_text.split())}")
-            st.write(f"**Nombre de caractères :** {len(user_text)}")
+            st.write(f"**Mots :** {len(user_text.split())}  |  **Caractères :** {len(user_text)}")
             if juridique_boost:
-                st.success(f"⚖️ Boost juridique actif : {len(juridique_boost.split())} mots injectés (B01 compétences × répétitions)")
+                st.success(f"Boost juridique actif : {len(juridique_boost.split())} mots injectés (B01 x répétitions)")
             else:
-                st.info("ℹ️ Pas de boost juridique (profil non-juriste)")
+                st.info("Pas de boost juridique.")
 
-        with st.expander("🔍 DEBUG : Likert → Texte sémantique (correction #4)", expanded=False):
-            st.info("Avant correction : les niveaux Likert étaient concaténés bruts (ex: 'Data Analysis Avancé')")
-            st.success("Après correction : les niveaux sont convertis en phrases sémantiques françaises")
+        with st.expander("DEBUG - Likert vers texte sémantique", expanded=False):
             st.text_area("Texte sémantique généré depuis les sliders :", likert_summary, height=150)
 
-        with st.expander("🔍 DEBUG : Texte après enrichissement GenAI", expanded=False):
+        with st.expander("DEBUG - Texte après enrichissement GenAI", expanded=False):
             if enriched_projet != projet_tech:
-                st.success(f"✅ Projet enrichi : {len(enriched_projet.split())} mots (original : {len(projet_tech.split())})")
+                st.success(f"Projet enrichi : {len(enriched_projet.split())} mots (original : {len(projet_tech.split())})")
             if enriched_interet != interet_specifique:
-                st.success(f"✅ Intérêt enrichi : {len(enriched_interet.split())} mots (original : {len(interet_specifique.split())})")
+                st.success(f"Intérêt enrichi : {len(enriched_interet.split())} mots (original : {len(interet_specifique.split())})")
             st.text_area("Texte final envoyé à l'analyse NLP :", final_text, height=200)
 
-        with st.expander("🔍 DEBUG : Scores des compétences détectées", expanded=False):
+        with st.expander("DEBUG - Scores des compétences détectées", expanded=False):
             if comp_scores:
                 top_comps = sorted(comp_scores.items(), key=lambda x: -x[1])[:10]
                 st.write("**Top 10 compétences matchées :**")
                 for cid, score in top_comps:
                     st.write(f"- {comp_idx[cid]['texte']} : {score:.2%}")
             else:
-                st.error("❌ Aucune compétence détectée ! Problème dans l'analyse.")
+                st.error("Aucune compétence détectée.")
 
 st.divider()
-st.caption("AISCA © 2026 | EFREI - Master Data Engineering & AI | Projet IA Générative - Bloc RNCP40875")
+st.caption("AISCA - 2026 | EFREI - Master Data Engineering & AI | Projet IA Générative")
