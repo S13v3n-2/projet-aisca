@@ -58,7 +58,7 @@ def load_and_index_data(json_path: str) -> Tuple[Dict, Dict, List[str], np.ndarr
 
 
 # ____________________________________________________________________________
-# CONVERSION LIKERT → TEXTE SÉMANTIQUE PONDÉRÉ
+# CONVERSION LIKERT EN TEXTE SÉMANTIQUE PONDÉRÉ
 # ____________________________________________________________________________
 
 # FIX #6 : Pondération par répétition (query expansion)
@@ -225,7 +225,7 @@ def analyze_profile(
     candidate_ids     = [comp_ids[idx] for idx in candidate_indices]
     raw_scores        = [hit['score']   for hit in hits[0]]
 
-    print(f"\n🔍 DEBUG analyze_profile:")
+    print(f"\n DEBUG analyze_profile:")
     print(f"  - Scores cosinus bruts: min={min(raw_scores):.3f}, max={max(raw_scores):.3f}")
     print(f"  - Compétences analysées: {len(raw_scores)}/{len(comp_ids)}")
 
@@ -322,7 +322,7 @@ def recommend_jobs(
         })
 
     top_all = sorted(recommendations, key=lambda x: x['score'], reverse=True)[:5]
-    print(f"\n🏆 DEBUG recommend_jobs (top 5) :")
+    print(f"\n DEBUG recommend_jobs (top 5) :")
     for r in top_all:
         print(f"  {r['titre']:45s} → {r['score']:.2%}")
 
