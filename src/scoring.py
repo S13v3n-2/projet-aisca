@@ -15,8 +15,8 @@ from sentence_transformers import SentenceTransformer, util
 @st.cache_resource
 def get_models() -> SentenceTransformer:
     #bi_model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
-    model_path = Path(__file__).parent / "scoring-camembert-v2"
-    bi_model = SentenceTransformer(str(model_path))
+    #model_path = Path(__file__).parent / "scoring-camembert-v2"
+    bi_model = SentenceTransformer('S13v3n-2/scoring-camembert-v2')
     return bi_model
 
 
