@@ -14,7 +14,9 @@ from sentence_transformers import SentenceTransformer, util
 # sinon ça prenait 10 secondes à chaque interaction, pas ouf
 @st.cache_resource
 def get_models() -> SentenceTransformer:
-    bi_model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+    #bi_model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+    model_path = Path(__file__).parent / "scoring-camembert-v2"
+    bi_model = SentenceTransformer(str(model_path))
     return bi_model
 
 
