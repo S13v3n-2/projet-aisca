@@ -11,7 +11,7 @@ from scoring import get_models, load_and_index_data, analyze_profile, recommend_
 from genai_augmentation import enrich_short_text, generate_learning_path, generate_professional_bio
 
 st.set_page_config(
-    page_title="AISCA - Orientation Professionnelle",
+    page_title="OSCC : Outil de Structuration et de Cartographie des Compétences",
     page_icon="favicon.ico",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -744,4 +744,4 @@ if submit:
                 st.error("Aucune competence detectee.")
 
 st.divider()
-st.caption("AISCA - 2026 | EFREI - Master Data Engineering & AI | Projet IA Generative")
+st.caption("OSCC - 2026 | EFREI - Master Data Engineering & AI | Projet IA Generative")

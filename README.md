@@ -1,4 +1,4 @@
-# AISCA - Agent Intelligent de Cartographie des Competences
+# OSCC : Outil de Structuration et de Cartographie des Compétences.
 
 Projet realise dans le cadre du module IA Generative en M1 Data Engineering & AI a l'EFREI.
 
