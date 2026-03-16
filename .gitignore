@@ -210,3 +210,4 @@ __marimo__/
 /cache/
 .idea/
 /scoring-camembert-v1/
+/src/scoring-camembert-v2/
