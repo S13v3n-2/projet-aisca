@@ -1,8 +1,10 @@
-# module de scoring sémantique pour matcher les compétences avec les métiers
-# on utilise SBERT (bi-encoder multilingue) parce que c'est le seul qui gère
-# correctement le français sans devoir traduire les textes avant
+# Moteur de scoring sémantique — matching compétences / métiers
+# Modèle : CamemBERT fine-tuné sur notre référentiel (S13v3n-2/scoring-camembert-v2)
+# La pondération des niveaux Likert repose sur une moyenne pondérée de vecteurs
+# plutôt que sur de la répétition de texte — plus précis et nettement plus rapide.
 
 import json
+import torch
 from pathlib import Path
 from typing import Dict, List, Tuple
 import numpy as np
@@ -10,20 +12,19 @@ import streamlit as st
 from sentence_transformers import SentenceTransformer, util
 
 
-# on charge le modèle une seule fois grâce au cache streamlit
-# sinon ça prenait 10 secondes à chaque interaction, pas ouf
 @st.cache_resource
 def get_models() -> SentenceTransformer:
-    #bi_model = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
-    #model_path = Path(__file__).parent / "scoring-camembert-v2"
+    # Chargement unique au démarrage — HuggingFace met le modèle en cache local
+    # après le premier téléchargement, donc pas de latence aux lancements suivants.
     bi_model = SentenceTransformer('S13v3n-2/scoring-camembert-v2')
     return bi_model
 
 
-# on charge le référentiel et on pré-calcule tous les embeddings des compétences
-# comme ça au moment de l'analyse c'est instantané
 @st.cache_data
 def load_and_index_data(json_path: str) -> Tuple[Dict, Dict, List[str], np.ndarray]:
+    # Lecture du référentiel et construction d'un index plat id -> compétence.
+    # On aplatit la structure blocs/compétences pour faire des lookups O(1)
+    # pendant le scoring, sans re-parcourir le JSON à chaque analyse.
     with open(json_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
@@ -32,16 +33,19 @@ def load_and_index_data(json_path: str) -> Tuple[Dict, Dict, List[str], np.ndarr
         for comp in bloc['competences']:
             cid = comp['id']
             comp_index[cid] = {
-                'texte': comp['texte'],
-                'bloc_id': bloc['id'],
+                'texte':    comp['texte'],
+                'bloc_id':  bloc['id'],
                 'bloc_nom': bloc['nom']
             }
 
     bi_model = get_models()
     comp_ids = list(comp_index.keys())
-    texts = [comp_index[cid]['texte'] for cid in comp_ids]
+    texts    = [comp_index[cid]['texte'] for cid in comp_ids]
 
-    # batch_size=64 ça passe bien même sur CPU, on a testé
+    # Les embeddings sont précalculés ici une bonne fois pour toutes.
+    # L'ordre de comp_ids et celui des lignes dans la matrice sont identiques —
+    # c'est ce qui permet de retrouver l'ID d'une compétence à partir de son
+    # indice dans les résultats de semantic_search.
     embeddings = bi_model.encode(
         texts,
         convert_to_tensor=True,
@@ -52,30 +56,32 @@ def load_and_index_data(json_path: str) -> Tuple[Dict, Dict, List[str], np.ndarr
     return data, comp_index, comp_ids, embeddings
 
 
-# on répète les phrases selon le niveau déclaré par l'utilisateur
-# l'idée c'est que si quelqu'un se dit expert en ML, on veut que ça pèse
-# beaucoup plus dans l'embedding final que quelqu'un qui se dit intermédiaire
-# on a testé plusieurs valeurs et 3x/5x ça donne les meilleurs résultats
-# pour les débutants on met 0 parce que sinon ça ajoutait du bruit inutile
-LIKERT_REPETITIONS = {
-    "Débutant":      0,
-    "Intermédiaire": 1,
-    "Avancé":        3,
-    "Expert":        5,
+# Poids associés à chaque niveau Likert.
+# On n'utilise pas une échelle linéaire (0/1/2/3) parce qu'elle traiterait
+# le saut Intermédiaire->Avancé et le saut Avancé->Expert comme équivalents,
+# ce qui ne correspond pas à la réalité du terrain. Un Expert a une maîtrise
+# qualitativement différente d'un Avancé — d'où la progression 0.25 -> 0.60 -> 1.0.
+# Le niveau Débutant est volontairement ignoré : inclure un signal très faible
+# introduit plus de bruit qu'il n'apporte d'information utile.
+LIKERT_WEIGHTS = {
+    "Débutant":      0.0,
+    "Intermédiaire": 0.25,
+    "Avancé":        0.60,
+    "Expert":        1.0,
 }
 
-# phrases sémantiques pour chaque domaine, on reprend le vocabulaire exact
-# du référentiel pour que le matching soit le plus précis possible
-# au début on avait des phrases plus courtes mais les scores étaient trop bas
+# Phrases descriptives par domaine, rédigées avec le vocabulaire exact du référentiel.
+# Chaque phrase sert d'ancre sémantique pour son domaine : elle est encodée une seule
+# fois au démarrage et son vecteur est pondéré selon le niveau déclaré par l'utilisateur.
 DOMAINE_PHRASES = {
-    # vocabulaire calqué sur le bloc B02 du référentiel
+    # Bloc B02 — Business et Stratégie
     "business": (
         "Je maîtrise la stratégie d'entreprise et la définition de business models innovants. "
         "Je réalise des analyses de marché, des études de faisabilité technique et financière. "
         "Je pilote des projets complexes avec méthodes agiles, je conduis des analyses concurrentielles "
         "et j'accompagne le changement et les transformations organisationnelles."
     ),
-    # vocabulaire du bloc B01, on l'utilise surtout pour le profil test Juriste
+    # Bloc B01 — Juridique
     "juridique": (
         "Je maîtrise le droit des affaires, le droit commercial et le droit du travail. "
         "J'analyse et interprète des contrats et textes juridiques complexes. "
@@ -84,7 +90,7 @@ DOMAINE_PHRASES = {
         "J'effectue une veille réglementaire et juridique continue. "
         "Je protège la propriété intellectuelle et gère les procédures de contentieux."
     ),
-    # bloc B04
+    # Bloc B04 — Finance et Comptabilité
     "finance": (
         "Je maîtrise la comptabilité générale et analytique en normes françaises et IFRS. "
         "Je réalise des analyses financières et diagnostics économiques approfondis. "
@@ -92,7 +98,7 @@ DOMAINE_PHRASES = {
         "Je crée des tableaux de bord financiers pour le pilotage décisionnel. "
         "Je gère la trésorerie et évalue la rentabilité des investissements."
     ),
-    # bloc B06
+    # Bloc B06 — Création et Design
     "design": (
         "Je maîtrise le design graphique et la création d'identité visuelle complète. "
         "J'assure la direction artistique de projets créatifs complexes. "
@@ -101,7 +107,7 @@ DOMAINE_PHRASES = {
         "Je maîtrise la suite Adobe Photoshop Illustrator InDesign et Figma. "
         "Je développe mon sens esthétique, je pratique les arts visuels et j'aime le dessin."
     ),
-    # blocs B05 + B07
+    # Blocs B05 + B07 — Communication et Marketing
     "communication": (
         "Je maîtrise la communication corporate et la stratégie de communication interne et externe. "
         "Je gère les relations publiques, les relations avec la presse et les situations de crise médiatique. "
@@ -112,7 +118,7 @@ DOMAINE_PHRASES = {
         "Je développe des stratégies d'influence marketing et partenariats créateurs. "
         "J'optimise le référencement SEO et SEA et gère des campagnes publicitaires en ligne."
     ),
-    # bloc B08
+    # Bloc B08 — Data Analysis
     "data_analysis": (
         "Je programme en Python ou R pour l'analyse de données avec Pandas NumPy. "
         "Je maîtrise SQL pour interroger et manipuler des bases de données. "
@@ -122,7 +128,7 @@ DOMAINE_PHRASES = {
         "Je crée des dashboards interactifs pour le pilotage décisionnel. "
         "Je réalise des analyses exploratoires EDA et interprète les résultats statistiques."
     ),
-    # bloc B09
+    # Bloc B09 — Machine Learning et IA
     "ml": (
         "Je développe et entraîne des algorithmes de machine learning supervisé et non supervisé. "
         "Je conçois des réseaux de neurones profonds pour le deep learning. "
@@ -132,7 +138,7 @@ DOMAINE_PHRASES = {
         "Je déploie des modèles d'IA en production avec MLOps. "
         "J'optimise les hyperparamètres et évalue les performances des modèles."
     ),
-    # bloc B10
+    # Bloc B10 — Développement et Infrastructure
     "dev": (
         "Je programme en Python Java JavaScript avec les bonnes pratiques. "
         "Je développe des API REST robustes et scalables avec Flask Django FastAPI. "
@@ -141,7 +147,7 @@ DOMAINE_PHRASES = {
         "Je déploie des infrastructures cloud AWS Azure GCP. "
         "J'utilise Git Docker et Kubernetes pour la conteneurisation et l'orchestration."
     ),
-    # bloc B11
+    # Bloc B11 — Ingénierie Technique
     "engineering": (
         "Je conçois des systèmes mécaniques complexes et innovants. "
         "J'applique les principes de thermodynamique et énergétique. "
@@ -153,52 +159,109 @@ DOMAINE_PHRASES = {
 }
 
 
-# prend les niveaux likert de l'utilisateur et les transforme en texte sémantique
-# on répète les phrases selon le niveau pour que le bi-encoder capte la pondération
+@st.cache_data
+def get_domaine_embeddings() -> dict:
+    # Encodage des phrases de domaine au démarrage, mis en cache Streamlit.
+    # Ces vecteurs servent de base à la pondération Likert dans build_profile_embedding.
+    # Les recalculer à chaque analyse serait inutile — les phrases ne changent pas.
+    bi_model = get_models()
+    return {
+        key: bi_model.encode(phrase, convert_to_tensor=True)
+        for key, phrase in DOMAINE_PHRASES.items()
+    }
+
+
+def build_profile_embedding(levels: Dict[str, str], extra_text: str = ""):
+    # Construction du vecteur profil par moyenne pondérée des embeddings de domaine.
+    #
+    # Principe : chaque domaine a un vecteur e_i et un poids w_i (issu de LIKERT_WEIGHTS).
+    # Le vecteur profil est la somme pondérée divisée par la somme des poids :
+    #   v_profil = somme(w_i * e_i) / somme(w_i)
+    #
+    # Si l'utilisateur a renseigné du texte libre (projet, outils, objectifs...),
+    # on le fusionne avec un poids de 30% pour enrichir le signal sans écraser
+    # la pondération Likert qui reste la source principale.
+    #
+    # La normalisation L2 finale garantit que semantic_search calcule bien
+    # une similarité cosinus dans [0, 1] et non un produit scalaire brut.
+
+    domaine_embeddings = get_domaine_embeddings()
+    bi_model           = get_models()
+
+    weighted_sum = None
+    total_weight = 0.0
+
+    for key, level in levels.items():
+        weight = LIKERT_WEIGHTS.get(level, 0.0)
+        if weight == 0.0:
+            continue
+        if key not in domaine_embeddings:
+            continue
+
+        emb = domaine_embeddings[key].float()
+        weighted_sum = weight * emb if weighted_sum is None else weighted_sum + weight * emb
+        total_weight += weight
+
+    # Si tous les niveaux sont à Débutant, on bascule en mode texte libre pur.
+    if weighted_sum is None or total_weight == 0.0:
+        if extra_text.strip():
+            return bi_model.encode(extra_text, convert_to_tensor=True)
+        raise ValueError("Aucun niveau renseigné et pas de texte libre fourni.")
+
+    profile_emb = weighted_sum / total_weight
+
+    # Fusion 70/30 avec le texte libre
+    if extra_text.strip():
+        extra_emb   = bi_model.encode(extra_text, convert_to_tensor=True).float()
+        profile_emb = 0.7 * profile_emb + 0.3 * extra_emb
+
+    # Normalisation L2
+    norm = torch.norm(profile_emb)
+    if norm > 0:
+        profile_emb = profile_emb / norm
+
+    return profile_emb
+
+
 def likert_to_semantic_text(levels: Dict[str, str]) -> str:
+    # Génère un résumé textuel du profil à partir des niveaux Likert.
+    # Sert principalement à construire le contexte des prompts Gemini
+    # dans genai_augmentation — pas utilisé pour l'encodage NLP.
     parts = []
     for key, level in levels.items():
-        repetitions = LIKERT_REPETITIONS.get(level, 0)
-        if repetitions == 0:
-            continue  # débutant = on skip, ça pollue l'embedding sinon
+        weight = LIKERT_WEIGHTS.get(level, 0.0)
+        if weight == 0.0:
+            continue
         phrase = DOMAINE_PHRASES.get(key, "")
         if phrase:
-            for _ in range(repetitions):
-                parts.append(phrase)
-
+            parts.append(f"[{level}] {phrase}")
     return " ".join(parts)
 
 
-# analyse le profil utilisateur et renvoie les scores de match par compétence
-# on utilise uniquement le bi-encoder maintenant, le cross-encoder anglais
-# marchait vraiment pas sur du texte français donc on l'a viré
-# on garde le paramètre cross_model pour pas casser l'interface mais il sert à rien
 def analyze_profile(
-        user_text: str,
+        user_emb,
         bi_model: SentenceTransformer,
         comp_ids: List[str],
         comp_embeddings: np.ndarray,
-        cross_model,           # pas utilisé, on garde pour compatibilité
+        cross_model,        # paramètre conservé pour rétrocompatibilité, non utilisé
         comp_index: Dict,
         top_k: int = None
 ) -> Dict[str, float]:
-    user_emb = bi_model.encode(user_text, convert_to_tensor=True)
-
-    # on analyse toutes les compétences (top_k=None), au début on avait top_k=50
-    # mais ça coupait des compétences pertinentes, du coup on analyse tout
-    k = len(comp_ids) if top_k is None else top_k
+    # Calcul de la similarité cosinus entre le vecteur profil et chaque compétence
+    # du référentiel. On analyse toutes les compétences (top_k=None) pour ne rien
+    # rater — le coût est négligeable vu que les embeddings sont déjà en mémoire.
+    k    = len(comp_ids) if top_k is None else top_k
     hits = util.semantic_search(user_emb, comp_embeddings, top_k=k)
 
     candidate_indices = [hit['corpus_id'] for hit in hits[0]]
-    candidate_ids     = [comp_ids[idx] for idx in candidate_indices]
-    raw_scores        = [hit['score']   for hit in hits[0]]
+    candidate_ids     = [comp_ids[idx]    for idx in candidate_indices]
+    raw_scores        = [hit['score']     for hit in hits[0]]
 
     print(f"\n DEBUG analyze_profile:")
     print(f"  - Scores cosinus bruts: min={min(raw_scores):.3f}, max={max(raw_scores):.3f}")
     print(f"  - Compétences analysées: {len(raw_scores)}/{len(comp_ids)}")
 
-    # on garde les scores cosinus bruts, on avait essayé une normalisation min-max
-    # mais ça faussait les résultats en écrasant les écarts entre compétences
+    # Clamp à 0 pour éviter des scores négatifs sur les compétences très éloignées.
     result = {
         candidate_ids[idx]: float(max(0.0, raw_scores[idx]))
         for idx in range(len(candidate_ids))
@@ -212,17 +275,24 @@ def analyze_profile(
     return result
 
 
-# recommande les métiers les plus adaptés au profil
-# on fait une moyenne pondérée par rang des blocs requis pour chaque métier
-# le premier bloc requis compte 4x plus que le troisième, ça permet de mieux
-# discriminer entre des métiers qui partagent les mêmes blocs
 def recommend_jobs(
     comp_scores: Dict[str, float],
     data: Dict,
     top_n: int = 3
 ) -> Tuple[List[Dict], Dict[str, float]]:
-    # poids par rang, on a itéré plusieurs fois sur ces valeurs
-    # 4/2/1/0.5 ça donne un bon équilibre entre précision et diversité
+    # Remontée des scores compétences -> blocs -> métiers en trois étapes.
+    #
+    # 1. On moyenne les scores de toutes les compétences d'un même bloc
+    #    pour obtenir un score représentatif par bloc.
+    #
+    # 2. Pour chaque métier, on calcule une moyenne pondérée par rang des blocs requis.
+    #    Le premier bloc (rang 0) pèse 4x plus que le troisième — c'est lui qui
+    #    définit le coeur du métier. La division par total_weight normalise les scores
+    #    pour qu'un métier avec 4 blocs requis ne soit pas avantagé face à un avec 2.
+    #
+    # 3. Un bonus basé sur les compétences-clés du métier affine le classement
+    #    entre métiers qui partagent exactement les mêmes blocs. Il pèse 30% du score final.
+
     RANK_WEIGHTS = [4.0, 2.0, 1.0, 0.5]
 
     comp_to_bloc = {}
@@ -250,18 +320,15 @@ def recommend_jobs(
         if not bloc_ids:
             continue
 
-        # moyenne pondérée par rang
         total_weight = 0.0
         weighted_sum = 0.0
         for rank, bid in enumerate(bloc_ids):
-            weight = RANK_WEIGHTS[rank] if rank < len(RANK_WEIGHTS) else 0.25
+            weight        = RANK_WEIGHTS[rank] if rank < len(RANK_WEIGHTS) else 0.25
             weighted_sum += bloc_scores.get(bid, 0.0) * weight
             total_weight += weight
         base_score = weighted_sum / total_weight if total_weight > 0 else 0.0
 
-        # bonus compétences clés (30% du score final)
-        # ça affine le classement entre métiers qui ont les mêmes blocs
-        cles = job.get('competences_cles', [])
+        cles  = job.get('competences_cles', [])
         bonus = float(np.mean([comp_scores.get(cid, 0.0) for cid in cles])) * 0.3 if cles else 0.0
 
         job_score = base_score * 0.7 + bonus
