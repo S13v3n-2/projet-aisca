@@ -1,11 +1,10 @@
 # data.py
-
-# 1. RÉFÉRENTIEL DES BLOCS DE COMPÉTENCES
-# Ce dictionnaire sert à calculer les scores de similarité (Si) avec SBERT.
-# Chaque clé est un "Bloc" et la valeur est la liste des phrases vecteurs.
+# on stocke ici les blocs de compétences et les profils métiers en dur
+# c'est un peu un doublon avec referentiel.json mais on s'en sert
+# pour le scoring avec SBERT, chaque phrase sert de vecteur de comparaison
 
 COMPETENCY_BLOCKS = {
-    # --- FAC DE DROIT ---
+    # les compétences juridiques, c'est surtout pour matcher le profil Juriste
     "Juridique_Reglementaire": [
         "Analyse et rédaction de contrats juridiques",
         "Veille juridique et réglementaire stricte",
@@ -15,7 +14,7 @@ COMPETENCY_BLOCKS = {
         "Protection des données personnelles et RGPD"
     ],
 
-    # --- ÉCOLE DE COMMERCE ---
+    # compétences business classiques type école de commerce
     "Business_Strategie": [
         "Analyse financière et élaboration de business plan",
         "Définition de la stratégie d'entreprise et développement",
@@ -41,7 +40,7 @@ COMPETENCY_BLOCKS = {
         "Fiscalité d'entreprise et déclarations"
     ],
 
-    # --- ÉCOLE DE COMMUNICATION ---
+    # compétences comm et créa
     "Communication_Medias": [
         "Stratégie de communication globale et plan média",
         "Relations presse et relations publiques",
@@ -67,7 +66,7 @@ COMPETENCY_BLOCKS = {
         "Analytics, suivi de trafic et mesure de performance"
     ],
 
-    # --- ÉCOLE D'INGÉNIEUR ---
+    # compétences techniques / ingénieur
     "Data_Analysis": [
         "Nettoyage et préparation de données (Data Cleaning)",
         "Visualisation de données et storytelling (DataViz)",
@@ -101,28 +100,23 @@ COMPETENCY_BLOCKS = {
 }
 
 
-# 2. PROFILS MÉTIERS ET PONDÉRATIONS (WEIGHTS)
-# C'est ici que tu définis la logique "Métier".
-# Clé = Nom du métier
-# Valeur = Dictionnaire { "Nom_Du_Bloc": Poids }
-# Ces poids sont utilisés dans la formule de la page 9 du PDF.
-
+# profils métiers avec les poids par bloc
+# la clé c'est le nom du métier, la valeur c'est un dict bloc -> poids
+# un poids de 3 = bloc principal, 2 = important, 1 = bonus
+# on s'est basés sur les fiches ROME et un peu de bon sens pour les poids
 JOB_PROFILES = {
-    # --- DROIT ---
     "Avocat / Juriste": {
-        "Juridique_Reglementaire": 3, # Très important
-        "Communication_Medias": 1     # Bonus : savoir s'exprimer
+        "Juridique_Reglementaire": 3,
+        "Communication_Medias": 1     # faut savoir s'exprimer quand même
     },
     "Compliance Officer": {
         "Juridique_Reglementaire": 3,
         "Finance_Comptabilite": 1
     },
-
-    # --- COMMERCE ---
     "Chef de Produit (Product Manager)": {
         "Marketing_Vente": 3,
         "Business_Strategie": 2,
-        "Data_Analysis": 1 # De plus en plus demandé
+        "Data_Analysis": 1  # de plus en plus demandé en PM
     },
     "Business Developer": {
         "Business_Strategie": 3,
@@ -137,8 +131,6 @@ JOB_PROFILES = {
         "Digital_Social": 2,
         "Business_Strategie": 1
     },
-
-    # --- COM & DESIGN ---
     "Directeur Artistique / UX Designer": {
         "Creation_Design": 3,
         "Communication_Medias": 1
@@ -152,8 +144,6 @@ JOB_PROFILES = {
         "Communication_Medias": 3,
         "Digital_Social": 2
     },
-
-    # --- INGÉNIEUR ---
     "Data Scientist": {
         "Machine_Learning_IA": 3,
         "Data_Analysis": 3,
@@ -161,7 +151,7 @@ JOB_PROFILES = {
     },
     "Data Analyst": {
         "Data_Analysis": 3,
-        "Business_Strategie": 1, # Doit comprendre le business
+        "Business_Strategie": 1,  # faut comprendre le business derrière les chiffres
         "Dev_Infrastructure": 1
     },
     "Développeur Full Stack": {

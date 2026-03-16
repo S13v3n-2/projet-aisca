@@ -1,7 +1,6 @@
-"""
-Module d'augmentation par GenAI (RAG) - Respect Free Tier.
-Intègre Google Gemini 2.5 Flash avec caching automatique.
-"""
+# module d'augmentation par IA générative avec Gemini
+# on l'utilise pour enrichir les textes trop courts et générer les plans de progression
+# on a mis un cache fichier pour éviter de cramer le free tier de l'api
 
 import os
 import json
@@ -11,30 +10,26 @@ from pathlib import Path
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# ============================================================================
-# CHARGEMENT VARIABLES D'ENVIRONNEMENT
-# ============================================================================
-
+# on charge la clé api depuis le .env qui est dans le même dossier que le script
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# on crash plus si la clé est pas là, comme ça on peut au moins lancer l'interface
+# les fonctions gemini renverront juste un message d'erreur
 if not GEMINI_API_KEY:
-    raise ValueError(
-        "❌ GEMINI_API_KEY introuvable dans .env\n"
-        "Crée un fichier .env avec : GEMINI_API_KEY=ta_clé_ici"
-    )
+    print("GEMINI_API_KEY introuvable dans .env - les fonctions Gemini seront desactivees")
 
-# ============================================================================
-# CONFIGURATION
-# ============================================================================
-
+# dossier de cache pour stocker les réponses de l'api
+# comme ça si on relance avec les mêmes inputs on tape pas l'api
 CACHE_DIR = Path("cache")
 CACHE_DIR.mkdir(exist_ok=True)
 
-genai.configure(api_key=GEMINI_API_KEY)
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
-# ✅ MODÈLE CORRECT : gemini-2.5-flash (stable, juin 2025, 1M tokens)
+# on utilise gemini-2.5-flash, c'est le modèle stable avec 1M tokens de contexte
+# on avait testé gemini-pro avant mais flash est plus rapide et suffisant pour notre usage
 MODEL_NAME = "gemini-2.5-flash"
 
 generation_config = {
@@ -44,6 +39,8 @@ generation_config = {
     "max_output_tokens": 2048,
 }
 
+# on désactive tous les filtres de sécurité parce que sinon ça bloquait
+# des réponses parfaitement normales sur les compétences professionnelles
 safety_settings = [
     {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
     {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
@@ -51,22 +48,21 @@ safety_settings = [
     {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
 ]
 
+# seuils pour l'enrichissement de texte
+# en dessous de 15 mots on considère que c'est trop court
+# en dessous de 5 mots on enrichit systématiquement
 MAX_SHORT_TEXT_LENGTH = 15
 MIN_ENRICHMENT_LENGTH = 5
 
 
-# ============================================================================
-# CACHING SYSTÈME
-# ============================================================================
-
+# on hash le prompt pour avoir une clé unique par requête
 def get_cache_key(prompt: str, prefix: str = "") -> str:
-    """Génère une clé de cache unique basée sur le prompt."""
     content = f"{prefix}:{prompt}"
     return hashlib.sha256(content.encode()).hexdigest()
 
 
+# charge une réponse depuis le cache si elle existe
 def load_from_cache(cache_key: str) -> Optional[str]:
-    """Charge une réponse depuis le cache si elle existe."""
     cache_file = CACHE_DIR / f"{cache_key}.json"
     if cache_file.exists():
         try:
@@ -74,34 +70,33 @@ def load_from_cache(cache_key: str) -> Optional[str]:
                 data = json.load(f)
                 return data.get("response")
         except (json.JSONDecodeError, IOError) as e:
-            print(f"⚠️ Erreur lecture cache : {e}")
+            print(f"Erreur lecture cache : {e}")
             return None
     return None
 
 
+# sauvegarde une réponse dans le cache
 def save_to_cache(cache_key: str, response: str):
-    """Sauvegarde une réponse dans le cache."""
     cache_file = CACHE_DIR / f"{cache_key}.json"
     try:
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump({"response": response}, f, ensure_ascii=False, indent=2)
     except IOError as e:
-        print(f"⚠️ Erreur écriture cache : {e}")
+        print(f"Erreur écriture cache : {e}")
 
 
-# ============================================================================
-# HELPER : Appel API Gemini avec gestion d'erreurs
-# ============================================================================
-
+# fonction générique pour appeler gemini avec gestion du cache et des erreurs
+# on passe par là pour tous les appels api histoire de centraliser
 def call_gemini_api(prompt: str, cache_prefix: str) -> str:
-    """
-    Fonction générique pour appeler l'API Gemini avec cache et gestion d'erreurs.
-    """
+    # si y'a pas de clé api on retourne direct un message d'erreur
+    if not GEMINI_API_KEY:
+        return "Erreur API Gemini : cle API manquante, cree un .env avec GEMINI_API_KEY=ta_cle"
+
     cache_key = get_cache_key(prompt, prefix=cache_prefix)
     cached = load_from_cache(cache_key)
 
     if cached:
-        print(f"✅ Cache hit pour {cache_prefix}")
+        print(f"Cache hit pour {cache_prefix}")
         return cached
 
     try:
@@ -111,90 +106,68 @@ def call_gemini_api(prompt: str, cache_prefix: str) -> str:
             safety_settings=safety_settings
         )
 
-        print(f"🔄 Appel API Gemini ({cache_prefix})...")
+        print(f"Appel API Gemini ({cache_prefix})...")
         response = model.generate_content(prompt)
 
         if not response or not response.text:
             if hasattr(response, 'prompt_feedback'):
-                return f"⚠️ Réponse bloquée : {response.prompt_feedback}"
-            return "⚠️ Pas de réponse générée."
+                return f"Reponse bloquee : {response.prompt_feedback}"
+            return "Pas de reponse generee."
 
         generated_text = response.text.strip()
         save_to_cache(cache_key, generated_text)
-        print(f"✅ Réponse générée et mise en cache")
+        print(f"Reponse generee et mise en cache")
 
         return generated_text
 
     except Exception as e:
-        error_msg = f"⚠️ Erreur API Gemini : {type(e).__name__} - {str(e)}"
+        error_msg = f"Erreur API Gemini : {type(e).__name__} - {str(e)}"
         print(error_msg)
         return error_msg
 
 
-# ============================================================================
-# AUGMENTATION TEXTE (EF4.1)
-# ============================================================================
-
+# enrichit un texte trop court via gemini
+# on s'en sert quand l'utilisateur écrit genre "python data" et c'est tout
+# gemini reformule en ajoutant du contexte pro sans inventer des compétences
 def enrich_short_text(user_text: str) -> str:
-    """
-    Enrichit un texte utilisateur trop court via GenAI (usage conditionnel).
-
-    Args:
-        user_text: Texte d'origine
-
-    Returns:
-        Texte enrichi ou texte d'origine si déjà suffisant
-    """
     if not user_text or not user_text.strip():
         return user_text
 
     word_count = len(user_text.split())
 
     if word_count >= MIN_ENRICHMENT_LENGTH:
-        print(f"ℹ️ Texte suffisamment long ({word_count} mots), pas d'enrichissement")
+        print(f"Texte suffisamment long ({word_count} mots), pas d'enrichissement")
         return user_text
 
-    print(f"🔍 Enrichissement texte court ({word_count} mots)...")
+    print(f"Enrichissement texte court ({word_count} mots)...")
 
-    prompt = f"""Tu es un expert en orientation professionnelle. 
+    prompt = f"""Tu es un expert en orientation professionnelle.
 L'utilisateur a donné une réponse très courte : "{user_text}"
 
-Réécris cette phrase en ajoutant du contexte technique professionnel pertinent, 
+Réécris cette phrase en ajoutant du contexte technique professionnel pertinent,
 sans inventer de compétences non mentionnées. Maximum 3 phrases.
 
 Réponse enrichie (uniquement le texte, pas de préambule) :"""
 
     enriched = call_gemini_api(prompt, cache_prefix="enrich")
 
-    if enriched.startswith("⚠️"):
-        print(f"⚠️ Échec enrichissement, texte original conservé")
+    if enriched.startswith("Erreur") or enriched.startswith("Reponse") or enriched.startswith("Pas de"):
+        print(f"Echec enrichissement, texte original conserve")
         return user_text
 
     return enriched
 
 
-# ============================================================================
-# PLAN DE PROGRESSION (EF4.2)
-# ============================================================================
-
+# génère un plan de progression personnalisé pour les blocs faibles
+# on fait un seul appel api pour tout le plan, pas un par compétence
+# sinon ça explosait le quota
 def generate_learning_path(
     weak_skills: Dict[str, float],
     target_job: str,
     user_profile: str
 ) -> str:
-    """
-    Génère un plan de progression personnalisé (1 seul appel API).
-
-    Args:
-        weak_skills: {bloc_name: score} des compétences faibles
-        target_job: Métier cible
-        user_profile: Résumé du profil utilisateur
-
-    Returns:
-        Plan de progression formaté en Markdown
-    """
     if not weak_skills:
-        return "✨ **Félicitations !** Vous maîtrisez déjà tous les blocs requis pour ce métier."
+        return "Vous maitrisez deja tous les blocs requis pour ce metier."
 
     context = f"**Métier cible :** {target_job}\n\n"
     context += f"**Profil utilisateur :** {user_profile[:500]}...\n\n"
@@ -224,26 +197,13 @@ Utilise un ton motivant et pragmatique. Format Markdown strict."""
     return call_gemini_api(prompt, cache_prefix="learning_path")
 
 
-# ============================================================================
-# BIO PROFESSIONNELLE (EF4.3)
-# ============================================================================
-
+# génère une bio professionnelle style LinkedIn à partir du profil
+# on fait aussi un seul appel api, c'est suffisant pour 3-4 phrases
 def generate_professional_bio(
     top_skills: Dict[str, float],
     recommended_job: str,
     user_inputs: Dict[str, str]
 ) -> str:
-    """
-    Génère une bio professionnelle type Executive Summary (1 seul appel).
-
-    Args:
-        top_skills: Compétences fortes détectées
-        recommended_job: Métier recommandé #1
-        user_inputs: Champs du questionnaire
-
-    Returns:
-        Bio professionnelle concise (3-4 phrases)
-    """
     if not top_skills:
         return "Profil en développement avec un fort potentiel d'évolution dans le domaine choisi."
 
@@ -272,27 +232,20 @@ Bio professionnelle (uniquement le texte, pas de titre ni préambule) :"""
     return call_gemini_api(prompt, cache_prefix="bio")
 
 
-# ============================================================================
-# TEST UNITAIRE
-# ============================================================================
-
+# tests rapides pour vérifier que tout marche
 if __name__ == "__main__":
-    print(f"🧪 Test du module GenAI Augmentation")
-    print(f"📌 Modèle utilisé : {MODEL_NAME}\n")
-    print("="*70 + "\n")
+    print(f"Test du module GenAI Augmentation")
+    print(f"Modele utilise : {MODEL_NAME}\n")
 
-    # Test 1 : Enrichissement
-    print("1️⃣ TEST ENRICHISSEMENT TEXTE COURT")
-    print("-" * 70)
+    # test enrichissement
+    print("Test enrichissement texte court")
     short_text = "Python data"
     enriched = enrich_short_text(short_text)
-    print(f"📝 Original : {short_text}")
-    print(f"✨ Enrichi  : {enriched}")
-    print("\n" + "="*70 + "\n")
+    print(f"Original : {short_text}")
+    print(f"Enrichi  : {enriched}\n")
 
-    # Test 2 : Plan de progression
-    print("2️⃣ TEST GÉNÉRATION PLAN DE PROGRESSION")
-    print("-" * 70)
+    # test plan de progression
+    print("Test generation plan de progression")
     weak_skills_test = {
         "Machine Learning": 0.35,
         "Deep Learning": 0.28,
@@ -304,11 +257,9 @@ if __name__ == "__main__":
         "Profil junior avec bases en Python et statistiques, expérience en analyse de données"
     )
     print(plan)
-    print("\n" + "="*70 + "\n")
 
-    # Test 3 : Bio professionnelle
-    print("3️⃣ TEST GÉNÉRATION BIO PROFESSIONNELLE")
-    print("-" * 70)
+    # test bio
+    print("\nTest generation bio professionnelle")
     strong_skills_test = {
         "Data Analysis": 0.85,
         "Python": 0.78,
@@ -320,6 +271,5 @@ if __name__ == "__main__":
         {"projet_tech": "Création d'un dashboard Power BI pour analyse des ventes temps réel"}
     )
     print(bio)
-    print("\n" + "="*70 + "\n")
 
-    print("✅ Tous les tests terminés avec succès !")
+    print("\nTous les tests termines.")
