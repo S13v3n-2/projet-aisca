@@ -40,7 +40,7 @@ COMPETENCY_BLOCKS = {
         "Fiscalité d'entreprise et déclarations"
     ],
 
-    # compétences comm et créa
+    # compétences communication et créa
     "Communication_Medias": [
         "Stratégie de communication globale et plan média",
         "Relations presse et relations publiques",
@@ -151,7 +151,7 @@ JOB_PROFILES = {
     },
     "Data Analyst": {
         "Data_Analysis": 3,
-        "Business_Strategie": 1,  # faut comprendre le business derrière les chiffres
+        "Business_Strategie": 1,  
         "Dev_Infrastructure": 1
     },
     "Développeur Full Stack": {

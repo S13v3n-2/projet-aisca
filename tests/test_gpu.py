@@ -29,7 +29,7 @@ try:
 except Exception as e:
     print("nvcc not found:", e)
 
-# on check aussi cuDNN, des fois c'est installé mais pas linké correctement
+# on check aussi cuDNN
 print("\ncuDNN version")
 cudnn_header = "/usr/include/cudnn_version.h"
 if os.path.exists(cudnn_header):

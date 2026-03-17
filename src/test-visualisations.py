@@ -737,15 +737,17 @@ if st.session_state.show_results and st.session_state.results_data:
         weak_blocs   = {b['nom']: b['score'] for b in top_jobs[0]['blocs'] if b['score'] < 0.6}
         strong_blocs = {b['nom']: b['score'] for b in top_jobs[0]['blocs'] if b['score'] >= 0.6}
         if weak_blocs:
-            with st.spinner("Generation du plan..."):
-                profil_context = (
-                    f"Metier cible : {top_jobs[0]['titre']}.\n"
-                    f"Blocs deja maitrisés : {', '.join(f'{n} ({s:.0%})' for n, s in strong_blocs.items()) or 'aucun'}.\n"
-                    f"Blocs a developper : {', '.join(f'{n} ({s:.0%})' for n, s in weak_blocs.items())}.\n"
-                    f"Profil utilisateur : {user_text[:400]}"
-                )
+            with st.spinner("Generation du plan personnalise..."):
+                # on passe tout le profil brut a gemini pour une analyse croisee quanti + semantique
+                user_profile_data = {
+                    "likert_levels":  rd.get("likert_levels", {}),
+                    "outils":         rd.get("outils", {}),
+                    "soft_skills":    rd.get("soft_skills", {}),
+                    "textes_libres":  rd.get("textes_libres", {}),
+                    "formation":      rd.get("formation", {}),
+                }
                 learning_path = generate_learning_path(
-                    weak_blocs, top_jobs[0]['titre'], profil_context
+                    weak_blocs, strong_blocs, top_jobs[0]['titre'], user_profile_data
                 )
             st.markdown(learning_path)
         else:
@@ -1074,6 +1076,34 @@ else:
                         "comp_scores": comp_scores,
                         "projet_tech": _projet,
                         "objectif":    _objectif,
+                        # on stocke tout le profil brut pour le plan de progression gemini
+                        "likert_levels": dict(likert_levels),
+                        "outils": {
+                            "Data & Analytics": st.session_state.get("outils_data", []),
+                            "IA & Machine Learning": st.session_state.get("outils_ml", []),
+                            "Dev & Cloud": st.session_state.get("outils_dev", []),
+                            "Design & Creativite": st.session_state.get("outils_design", []),
+                            "Marketing & Communication": st.session_state.get("outils_marketing", []),
+                        },
+                        "soft_skills": {
+                            "Rigueur / Creativite": st.session_state.get("rigueur", ""),
+                            "Leadership": st.session_state.get("leadership", ""),
+                            "Persuasion": st.session_state.get("persuasion", ""),
+                            "Empathie": st.session_state.get("empathie", ""),
+                        },
+                        "textes_libres": {
+                            "Projet dont il est fier": _projet,
+                            "Journee ideale": _journee,
+                            "Domaines qui le passionnent": _interet,
+                            "Defis qui le stimulent": _defis,
+                            "Objectif de carriere": _objectif,
+                        },
+                        "formation": {
+                            "Niveau d'etudes": st.session_state.get("etudes", ""),
+                            "Domaine de formation": st.session_state.get("formation", ""),
+                            "Experience professionnelle": st.session_state.get("experience", ""),
+                            "Secteur d'activite": st.session_state.get("secteur", ""),
+                        },
                     }
                     st.session_state.show_results = True
                     st.rerun()

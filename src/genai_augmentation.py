@@ -36,7 +36,7 @@ generation_config = {
     "temperature": 0.7,
     "top_p": 0.95,
     "top_k": 40,
-    "max_output_tokens": 2048,
+    "max_output_tokens": 4096,
 }
 
 # on désactive tous les filtres de sécurité parce que sinon ça bloquait
@@ -158,43 +158,131 @@ Réponse enrichie (uniquement le texte, pas de préambule) :"""
     return enriched
 
 
-# génère un plan de progression personnalisé pour les blocs faibles
-# on fait un seul appel api pour tout le plan, pas un par compétence
-# sinon ça explosait le quota
+# genere un plan de progression personnalise et detaille
+# on passe maintenant tout le profil utilisateur (niveaux, outils, textes, formation)
+# pour que gemini puisse faire une vraie analyse croisee quanti + semantique
 def generate_learning_path(
     weak_skills: Dict[str, float],
+    strong_skills: Dict[str, float],
     target_job: str,
-    user_profile: str
+    user_profile_data: Dict
 ) -> str:
     if not weak_skills:
         return "Vous maitrisez deja tous les blocs requis pour ce metier."
 
-    context = f"**Métier cible :** {target_job}\n\n"
-    context += f"**Profil utilisateur :** {user_profile[:500]}...\n\n"
-    context += "**Compétences à développer prioritairement :**\n"
+    # --- construction du contexte complet pour gemini ---
 
-    for bloc, score in sorted(weak_skills.items(), key=lambda x: x[1])[:5]:
-        context += f"- {bloc} (score actuel : {score:.0%})\n"
+    # 1. donnees quantitatives : niveaux likert auto-evalues
+    likert = user_profile_data.get("likert_levels", {})
+    likert_section = ""
+    if likert:
+        likert_section = "**Auto-évaluation technique (niveaux déclarés par l'utilisateur) :**\n"
+        for domaine, niveau in likert.items():
+            likert_section += f"- {domaine} : {niveau}\n"
+
+    # 2. scores NLP par bloc (analyse semantique du modele)
+    scores_section = "**Scores NLP calculés par notre modèle (similarité sémantique) :**\n"
+    scores_section += "Blocs à développer :\n"
+    for bloc, score in sorted(weak_skills.items(), key=lambda x: x[1]):
+        scores_section += f"- {bloc} : {score:.0%}\n"
+    if strong_skills:
+        scores_section += "Blocs déjà maîtrisés :\n"
+        for bloc, score in sorted(strong_skills.items(), key=lambda x: -x[1]):
+            scores_section += f"- {bloc} : {score:.0%}\n"
+
+    # 3. outils deja maitrises par l'utilisateur
+    outils = user_profile_data.get("outils", {})
+    outils_section = ""
+    if outils and any(outils.values()):
+        outils_section = "**Outils et technologies déjà maîtrisés :**\n"
+        for cat, tools in outils.items():
+            if tools:
+                outils_section += f"- {cat} : {', '.join(tools)}\n"
+
+    # 4. soft skills
+    soft = user_profile_data.get("soft_skills", {})
+    soft_section = ""
+    if soft and any(soft.values()):
+        soft_section = "**Soft skills déclarés :**\n"
+        for trait, val in soft.items():
+            if val:
+                soft_section += f"- {trait} : {val}\n"
+
+    # 5. textes libres (ce que l'etudiant a ecrit lui-meme)
+    textes = user_profile_data.get("textes_libres", {})
+    textes_section = ""
+    if textes and any(textes.values()):
+        textes_section = "**Réponses libres de l'utilisateur (à analyser sémantiquement) :**\n"
+        for champ, txt in textes.items():
+            if txt and txt.strip():
+                textes_section += f"- {champ} : {txt[:300]}\n"
+
+    # 6. parcours academique et pro
+    formation = user_profile_data.get("formation", {})
+    formation_section = ""
+    if formation and any(formation.values()):
+        formation_section = "**Parcours académique et professionnel :**\n"
+        for k, v in formation.items():
+            if v:
+                formation_section += f"- {k} : {v}\n"
+
+    context = f"**Métier cible :** {target_job}\n\n"
+    context += "\n".join(filter(None, [
+        likert_section, scores_section, outils_section,
+        soft_section, textes_section, formation_section
+    ]))
 
     prompt = f"""{context}
 
-En tant qu'expert en orientation Data/IA/Business, génère un plan de progression structuré :
+Tu es un conseiller expert en orientation professionnelle spécialisé Data/IA/Business/Droit/Design/Communication.
+L'utilisateur est un étudiant ou jeune professionnel. Tu dois produire un plan de progression **ultra-personnalisé** en croisant :
 
-## 1. Compétences prioritaires
-Liste les 3 compétences à développer en PREMIER pour le métier {target_job}.
+1. **L'analyse quantitative** : les niveaux Likert auto-évalués ET les scores NLP calculés par notre modèle.
+   Compare les deux : si l'utilisateur se déclare "Avancé" en Data Analysis mais que le score NLP est bas,
+   signale cet écart et propose d'approfondir. Inversement, valorise les points forts confirmés.
 
-## 2. Ressources concrètes
-Pour chaque compétence, propose :
-- Un cours en ligne (nom précis + plateforme : Coursera, Udemy, OpenClassrooms, etc.)
-- Un projet pratique à réaliser
-- Une certification pertinente si applicable
+2. **L'analyse sémantique** : les réponses libres de l'utilisateur (projet, journée idéale, intérêts, défis, objectif).
+   Identifie ses motivations profondes, ses centres d'intérêt réels, son style de travail préféré.
+   Adapte tes recommandations à CE profil précis, pas des conseils génériques.
 
-## 3. Timeline réaliste
-Étapes sur 6-12 mois avec jalons mensuels clairs.
+3. **Les outils déclarés** : l'utilisateur maîtrise déjà certains outils. Ne recommande PAS ce qu'il sait déjà.
+   Propose les outils COMPLÉMENTAIRES qu'il doit apprendre pour le métier {target_job}.
 
-Utilise un ton motivant et pragmatique. Format Markdown strict."""
+4. **Le niveau d'études et l'expérience** : adapte la difficulté et le type de ressources.
+   Un Bac+5 avec 3-5 ans d'expérience ne reçoit pas les mêmes recommandations qu'un étudiant en Bac+3.
 
-    return call_gemini_api(prompt, cache_prefix="learning_path")
+Génère le plan suivant en Markdown strict :
+
+## Diagnostic personnalisé
+Résumé en 3-4 phrases : points forts confirmés, écarts identifiés entre auto-évaluation et scores NLP,
+et axes de progression prioritaires. Mentionne les soft skills de l'utilisateur et comment ils servent
+(ou desservent) le métier cible.
+
+## Plan de progression détaillé
+Pour CHAQUE bloc à développer (du plus faible au plus fort), crée une sous-section :
+
+### [Nom du bloc] — Score actuel : X%
+- **Pourquoi c'est prioritaire** : explique en 1-2 phrases pourquoi ce bloc est critique pour {target_job}
+- **Ce que l'utilisateur a déjà** : mentionne les outils/compétences qu'il possède déjà dans ce domaine
+- **Ce qu'il doit apprendre** :
+  - Compétence 1 → Cours précis (nom + plateforme : Coursera, Udemy, OpenClassrooms, DataCamp, etc.)
+  - Compétence 2 → Cours précis
+- **Projet pratique** : un projet concret à réaliser, en lien avec ses intérêts déclarés si possible
+- **Certification recommandée** : uniquement si elle existe et est reconnue (Google, AWS, Microsoft, HubSpot, etc.).
+  Précise le nom exact, le coût approximatif, et pourquoi elle est pertinente. Si aucune certification
+  n'est vraiment adaptée, ne force pas — dis-le clairement.
+
+## Outils à acquérir
+Liste les outils/technologies que l'utilisateur ne maîtrise PAS encore mais qui sont essentiels pour {target_job}.
+Pour chacun, propose une ressource d'apprentissage concrète.
+
+## Timeline réaliste
+Plan sur 6-12 mois avec des jalons mensuels clairs. Adapte la charge en fonction de son niveau
+d'études et son expérience. Un étudiant à temps plein peut avancer plus vite qu'un professionnel en poste.
+
+Ton motivant et pragmatique. Sois PRÉCIS sur les noms de cours et certifications — pas de "un cours de ML" mais "Machine Learning Specialization par Andrew Ng sur Coursera"."""
+
+    return call_gemini_api(prompt, cache_prefix="learning_path_v2")
 
 
 # génère une bio professionnelle style LinkedIn à partir du profil
@@ -251,10 +339,18 @@ if __name__ == "__main__":
         "Deep Learning": 0.28,
         "NLP": 0.42
     }
+    strong_skills_test_plan = {
+        "Data Analysis": 0.75,
+    }
+    test_profile = {
+        "likert_levels": {"data_analysis": "Avancé", "ml": "Intermédiaire", "dev": "Débutant"},
+        "outils": {"Data & Analytics": ["Python", "Pandas", "SQL"]},
+        "soft_skills": {"Rigueur": "Rigoureux et attentif aux détails"},
+        "textes_libres": {"Projet dont il est fier": "Dashboard Power BI pour analyse des ventes"},
+        "formation": {"Niveau d'etudes": "Bac+5 (Master)", "Experience": "0-2 ans"},
+    }
     plan = generate_learning_path(
-        weak_skills_test,
-        "Data Scientist",
-        "Profil junior avec bases en Python et statistiques, expérience en analyse de données"
+        weak_skills_test, strong_skills_test_plan, "Data Scientist", test_profile
     )
     print(plan)
 
