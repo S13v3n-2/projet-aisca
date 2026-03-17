@@ -622,6 +622,100 @@ if st.session_state.show_results and st.session_state.results_data:
                 st.session_state.selected_job_idx = i
                 st.rerun()
 
+    # ── Heatmap comparative blocs × métiers ─────────────────────────────
+    st.markdown("---")
+    st.markdown(
+        f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
+        f'{ICONS["trending"]}<h2 style="margin:0;">Comparaison des 3 métiers — vue blocs</h2></div>',
+        unsafe_allow_html=True
+    )
+
+    # Tous les blocs uniques, dans l'ordre du premier métier puis des suivants
+    _all_blocs, _seen = [], set()
+    for _j in top_jobs:
+        for _b in _j.get('blocs', []):
+            if _b['nom'] not in _seen:
+                _all_blocs.append(_b['nom'])
+                _seen.add(_b['nom'])
+
+    # Lookup score par (job_idx, bloc_nom)
+    _slookup = [{_b['nom']: float(_b['score']) for _b in _j.get('blocs', [])} for _j in top_jobs]
+
+    _mc = ["#f5a623", "#8b949e", "#cd7f32"]
+
+    # Header colonnes (titres métiers tronqués)
+    _hdr = ''.join(
+        f'<th style="padding:10px 12px;font-size:12px;font-weight:600;color:{_mc[_i]};'
+        f'text-align:center;white-space:nowrap;border-bottom:2px solid {_mc[_i]}22;">'
+        f'{"#"+str(_i+1)} {_j["titre"][:22]+("…" if len(_j["titre"])>22 else "")}</th>'
+        for _i, _j in enumerate(top_jobs)
+    )
+
+    # Lignes blocs
+    _rows = ''
+    for _bn in _all_blocs:
+        _bn_safe = _bn.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+        _cells = ''
+        for _i in range(len(top_jobs)):
+            _sc = _slookup[_i].get(_bn)
+            if _sc is None:
+                _cells += '<td style="text-align:center;color:#484f58;font-size:12px;">—</td>'
+            else:
+                _pct = int(_sc * 100)
+                _col = '#3fb950' if _sc >= 0.70 else '#d29922' if _sc >= 0.45 else '#f85149'
+                _cells += (
+                    f'<td style="text-align:center;padding:8px 10px;">'
+                    f'<span style="display:inline-block;min-width:46px;padding:3px 8px;'
+                    f'border-radius:6px;background:{_col}22;color:{_col};'
+                    f'font-size:12px;font-weight:600;">{_pct}%</span></td>'
+                )
+        _rows += (
+            f'<tr style="border-bottom:1px solid #21262d;">'
+            f'<td style="padding:8px 14px;font-size:13px;color:#c9d1d9;white-space:nowrap;">'
+            f'{_bn_safe}</td>{_cells}</tr>'
+        )
+
+    # Ligne totale (score global de chaque job)
+    _total_cells = ''
+    for _i, _j in enumerate(top_jobs):
+        _col = '#f5a623' if _i == 0 else '#8b949e' if _i == 1 else '#cd7f32'
+        _total_cells += (
+            f'<td style="text-align:center;padding:10px;">'
+            f'<span style="display:inline-block;min-width:46px;padding:4px 8px;'
+            f'border-radius:6px;background:{_col}33;color:{_col};'
+            f'font-size:13px;font-weight:700;">{int(_j["score"]*100)}%</span></td>'
+        )
+    _rows += (
+        f'<tr style="background:#161b22;">'
+        f'<td style="padding:10px 14px;font-size:12px;font-weight:600;color:#8b949e;'
+        f'text-transform:uppercase;letter-spacing:0.05em;">Score global</td>'
+        f'{_total_cells}</tr>'
+    )
+
+    _heatmap_h = 60 + len(_all_blocs) * 42 + 50
+    components.html(f"""
+    <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;
+                overflow-x:auto;font-family:'Inter',sans-serif;">
+        <table style="width:100%;border-collapse:collapse;min-width:380px;">
+            <thead>
+                <tr>
+                    <th style="padding:12px 14px;font-size:11px;font-weight:600;color:#484f58;
+                               text-align:left;text-transform:uppercase;letter-spacing:0.06em;
+                               border-bottom:1px solid #21262d;">Bloc de compétences</th>
+                    {_hdr}
+                </tr>
+            </thead>
+            <tbody>{_rows}</tbody>
+        </table>
+        <div style="padding:8px 14px;display:flex;gap:16px;border-top:1px solid #21262d;">
+            <span style="font-size:11px;color:#3fb950;">■ Maîtrise (≥70%)</span>
+            <span style="font-size:11px;color:#d29922;">■ En cours (45–69%)</span>
+            <span style="font-size:11px;color:#f85149;">■ À développer (&lt;45%)</span>
+        </div>
+    </div>""", height=_heatmap_h)
+
+    st.markdown("---")
+
     job          = top_jobs[st.session_state.selected_job_idx]
     i_job        = st.session_state.selected_job_idx
     global_score = float(job['score'])
