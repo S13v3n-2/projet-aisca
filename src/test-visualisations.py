@@ -1,7 +1,8 @@
 # interface streamlit principale du projet AISCA
 # on a injecte du CSS et JS custom pour avoir un rendu dark mode premium
 # avec un step wizard au lieu du long formulaire a scroller
-# c'est pas la facon la plus propre de faire mais pour un proto streamlit ca marche bien
+# fusion de sauvegarde-front (CSS responsive, compétences par bloc, radar responsive)
+# et test-visualisations.py (results_data enrichi, generate_learning_path avec profil complet)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -16,44 +17,70 @@ from scoring import (
 from genai_augmentation import enrich_short_text, generate_learning_path, generate_professional_bio
 
 st.set_page_config(
-    page_title="OSCC",
+    page_title="AISCA",
     page_icon="favicon.ico",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# on utilise Path pour remonter au bon dossier quel que soit le cwd
 DATA_PATH = str(Path(__file__).parent.parent / "data" / "referentiel.json")
 
-# on injecte tout le CSS custom pour le dark mode et la typo
-# c'est un gros bloc mais c'est la seule facon de customiser streamlit a fond
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    /* reset du theme streamlit */
     .stApp {
         background-color: #0d1117 !important;
         color: #e6edf3 !important;
         font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
     }
 
-    /* cache la sidebar par defaut */
-    [data-testid="stSidebar"] {
-        display: none !important;
-    }
+    [data-testid="stSidebar"] { display: none !important; }
 
-    /* header streamlit */
     header[data-testid="stHeader"] {
         background-color: #0d1117 !important;
         border-bottom: 1px solid #21262d !important;
     }
 
-    /* vire le padding top par defaut */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-        max-width: 1100px !important;
+    /* =====================================================
+       RESPONSIVE — PLEIN ÉCRAN
+       Streamlit wide mode empile plusieurs conteneurs avec
+       max-width et margin:auto. On doit tous les neutraliser.
+       ===================================================== */
+    .block-container,
+    [data-testid="stMainBlockContainer"],
+    [data-testid="stBlockContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    section[data-testid="stMain"] > div,
+    .main > div {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding-left: 3rem !important;
+        padding-right: 3rem !important;
+        box-sizing: border-box !important;
+    }
+    .block-container,
+    [data-testid="stMainBlockContainer"] {
+        padding-top: 4rem !important;
+        padding-bottom: 2rem !important;
+    }
+    @media (min-width: 1800px) {
+        .block-container, [data-testid="stMainBlockContainer"] {
+            padding-left: 6rem !important; padding-right: 6rem !important;
+        }
+    }
+    @media (min-width: 1400px) and (max-width: 1799px) {
+        .block-container, [data-testid="stMainBlockContainer"] {
+            padding-left: 4rem !important; padding-right: 4rem !important;
+        }
+    }
+    @media (max-width: 900px) {
+        .block-container, [data-testid="stMainBlockContainer"] {
+            padding-left: 1rem !important; padding-right: 1rem !important;
+        }
+        [data-testid="column"] {
+            min-width: 100% !important; flex: 1 1 100% !important;
+        }
     }
 
     /* typo generale — IMPORTANT : on n'inclut PAS span dans ce reset.
@@ -66,215 +93,100 @@ st.markdown("""
         color: #e6edf3 !important;
     }
 
-    h1 {
-        font-size: 1.8rem !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.02em !important;
-    }
+    h1 { font-size: 1.8rem !important; font-weight: 700 !important; letter-spacing: -0.02em !important; }
+    h2 { font-size: 1.3rem !important; font-weight: 600 !important; letter-spacing: -0.01em !important; }
+    h3 { font-size: 1.1rem !important; font-weight: 600 !important; }
 
-    h2 {
-        font-size: 1.3rem !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.01em !important;
-    }
-
-    h3 {
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
-    }
-
-    /* barre de progression custom */
     .progress-container {
-        background: #161b22;
-        border-radius: 8px;
-        padding: 16px 24px;
-        margin-bottom: 24px;
-        border: 1px solid #21262d;
+        background: #161b22; border-radius: 8px; padding: 16px 24px;
+        margin-bottom: 24px; border: 1px solid #21262d;
     }
-    .progress-bar-bg {
-        background: #21262d;
-        border-radius: 4px;
-        height: 6px;
-        width: 100%;
-        margin-top: 12px;
-    }
+    .progress-bar-bg { background: #21262d; border-radius: 4px; height: 6px; width: 100%; margin-top: 12px; }
     .progress-bar-fill {
         background: linear-gradient(90deg, #58a6ff, #79c0ff);
-        border-radius: 4px;
-        height: 6px;
-        transition: width 0.4s ease;
+        border-radius: 4px; height: 6px; transition: width 0.4s ease;
     }
-    .progress-steps {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 8px;
-    }
-    .progress-step {
-        font-size: 0.7rem;
-        color: #484f58;
-        font-weight: 500;
-    }
-    .progress-step.active {
-        color: #58a6ff;
-    }
-    .progress-step.done {
-        color: #3fb950;
-    }
+    .progress-steps { display: flex; justify-content: space-between; margin-top: 8px; }
+    .progress-step { font-size: 0.7rem; color: #484f58; font-weight: 500; }
+    .progress-step.active { color: #58a6ff; }
+    .progress-step.done { color: #3fb950; }
 
-    /* cards et surfaces */
-    .card {
-        background: #161b22;
-        border: 1px solid #21262d;
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 16px;
-    }
+    .card { background: #161b22; border: 1px solid #21262d; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
 
-    /* boutons navigation */
+    details[data-testid="stExpander"] {
+        background: #0d1117 !important; border: 1px solid #21262d !important;
+        border-radius: 8px !important; margin-bottom: 6px !important;
+    }
+    details[data-testid="stExpander"] summary {
+        padding: 10px 14px !important; font-weight: 500 !important; font-size: 0.9rem !important;
+    }
+    details[data-testid="stExpander"][open] { border-color: #30363d !important; }
+
     .stButton > button {
-        background: #21262d !important;
-        color: #e6edf3 !important;
-        border: 1px solid #30363d !important;
-        border-radius: 8px !important;
-        padding: 8px 24px !important;
-        font-weight: 500 !important;
+        background: #21262d !important; color: #e6edf3 !important;
+        border: 1px solid #30363d !important; border-radius: 8px !important;
+        padding: 8px 24px !important; font-weight: 500 !important;
         font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         transition: all 0.2s ease !important;
     }
-    .stButton > button:hover {
-        background: #30363d !important;
-        border-color: #58a6ff !important;
-    }
+    .stButton > button:hover { background: #30363d !important; border-color: #58a6ff !important; }
     .stButton > button[kind="primary"] {
         background: linear-gradient(135deg, #238636, #2ea043) !important;
-        border-color: #238636 !important;
-        color: white !important;
+        border-color: #238636 !important; color: white !important;
     }
     .stButton > button[kind="primary"]:hover {
         background: linear-gradient(135deg, #2ea043, #3fb950) !important;
     }
 
-    /* inputs et sliders */
-    .stSelectbox > div > div,
-    .stMultiSelect > div > div,
-    .stTextArea textarea,
-    .stTextInput input {
-        background-color: #0d1117 !important;
-        color: #e6edf3 !important;
-        border-color: #30363d !important;
-        border-radius: 8px !important;
+    .stSelectbox > div > div, .stMultiSelect > div > div,
+    .stTextArea textarea, .stTextInput input {
+        background-color: #0d1117 !important; color: #e6edf3 !important;
+        border-color: #30363d !important; border-radius: 8px !important;
     }
-    .stTextArea textarea:focus,
-    .stTextInput input:focus {
-        border-color: #58a6ff !important;
-        box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15) !important;
+    .stTextArea textarea:focus, .stTextInput input:focus {
+        border-color: #58a6ff !important; box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15) !important;
     }
 
-    /* metrics */
     [data-testid="stMetric"] {
-        background: #161b22 !important;
-        border: 1px solid #21262d !important;
-        border-radius: 12px !important;
-        padding: 16px !important;
+        background: #161b22 !important; border: 1px solid #21262d !important;
+        border-radius: 12px !important; padding: 16px !important;
     }
-    [data-testid="stMetricValue"] {
-        color: #58a6ff !important;
-        font-weight: 700 !important;
-    }
-    [data-testid="stMetricLabel"] {
-        color: #8b949e !important;
-    }
+    [data-testid="stMetricValue"] { color: #58a6ff !important; font-weight: 700 !important; }
+    [data-testid="stMetricLabel"] { color: #8b949e !important; }
 
-    /* tabs */
     .stTabs [data-baseweb="tab-list"] {
-        background: #161b22 !important;
-        border-radius: 8px !important;
-        padding: 4px !important;
-        gap: 4px !important;
+        background: #161b22 !important; border-radius: 8px !important; padding: 4px !important; gap: 4px !important;
     }
     .stTabs [data-baseweb="tab"] {
-        background: transparent !important;
-        color: #8b949e !important;
-        border-radius: 6px !important;
-        font-weight: 500 !important;
+        background: transparent !important; color: #8b949e !important;
+        border-radius: 6px !important; font-weight: 500 !important;
     }
-    .stTabs [aria-selected="true"] {
-        background: #21262d !important;
-        color: #e6edf3 !important;
-    }
+    .stTabs [aria-selected="true"] { background: #21262d !important; color: #e6edf3 !important; }
 
-    /* divider */
-    hr {
-        border-color: #21262d !important;
-    }
+    hr { border-color: #21262d !important; }
 
-    /* progress bar streamlit */
-    .stProgress > div > div {
-        background: #21262d !important;
-        border-radius: 4px !important;
-    }
+    .stProgress > div > div { background: #21262d !important; border-radius: 4px !important; }
     .stProgress > div > div > div {
-        background: linear-gradient(90deg, #58a6ff, #79c0ff) !important;
-        border-radius: 4px !important;
+        background: linear-gradient(90deg, #58a6ff, #79c0ff) !important; border-radius: 4px !important;
     }
 
-    /* download button */
     .stDownloadButton > button {
-        background: #161b22 !important;
-        border-color: #30363d !important;
-        color: #58a6ff !important;
+        background: #161b22 !important; border-color: #30363d !important; color: #58a6ff !important;
     }
 
-    /* balloons */
     .stBalloons { display: none !important; }
 
-    /* step header */
-    .step-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 20px;
-    }
+    .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
     .step-number {
-        background: linear-gradient(135deg, #58a6ff, #388bfd);
-        color: #0d1117;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.9rem;
-        flex-shrink: 0;
+        background: linear-gradient(135deg, #58a6ff, #388bfd); color: #0d1117;
+        width: 32px; height: 32px; border-radius: 50%; display: flex;
+        align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
     }
-    .step-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #e6edf3;
-    }
-    .step-subtitle {
-        font-size: 0.85rem;
-        color: #8b949e;
-        margin-top: 2px;
-    }
+    .step-title { font-size: 1.2rem; font-weight: 600; color: #e6edf3; }
+    .step-subtitle { font-size: 0.85rem; color: #8b949e; margin-top: 2px; }
 
-    /* form submit override */
-    [data-testid="stFormSubmitButton"] button {
-        background: linear-gradient(135deg, #238636, #2ea043) !important;
-        border-color: #238636 !important;
-        color: white !important;
-        font-weight: 600 !important;
-        padding: 10px 32px !important;
-        border-radius: 8px !important;
-    }
+    #MainMenu {visibility: hidden;} footer {visibility: hidden;} .stDeployButton {display: none;}
 
-    /* hide default streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stDeployButton {display: none;}
-
-    /* selectbox dropdown dark */
     [data-baseweb="select"] { background-color: #0d1117 !important; }
     [data-baseweb="popover"] { background-color: #161b22 !important; border-color: #30363d !important; }
     [data-baseweb="menu"] { background-color: #161b22 !important; }
@@ -284,19 +196,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# icones SVG minimalistes a la place des emoji
 ICONS = {
-    "compass": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>',
-    "sliders": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
-    "users": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-    "edit": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
-    "wrench": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
+    "compass":   '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>',
+    "sliders":   '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+    "users":     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    "edit":      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+    "wrench":    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
     "briefcase": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
-    "target": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
-    "award": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>',
-    "trending": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
-    "book": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
-    "user": '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    "target":    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    "award":     '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>',
+    "trending":  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+    "book":      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+    "user":      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
 }
 
 STEP_NAMES = ["Domaines", "Niveaux", "Soft skills", "Experiences", "Outils", "Parcours"]
@@ -316,7 +227,6 @@ def initialize_app():
 with st.spinner("Chargement du modele NLP..."):
     bi_model, data, comp_idx, comp_ids, embeddings = initialize_app()
 
-# etat du wizard
 if "current_step" not in st.session_state:
     st.session_state.current_step = 0
 if "show_results" not in st.session_state:
@@ -326,9 +236,8 @@ if "results_data" not in st.session_state:
 
 
 def render_progress_bar(current_step, total_steps, step_names):
-    # La barre doit pointer exactement sous le label de l'étape courante.
-    # Avec total_steps=6 étapes (indices 0 à 5), on répartit sur total_steps-1 intervalles.
-    # Étape 0 → 0%, étape 1 → 20%, ..., étape 5 → 100%
+    # barre alignée exactement sous le label de l'étape courante
+    # étape 0 → 0%, étape 5 → 100%
     pct = int((current_step / (total_steps - 1)) * 100) if total_steps > 1 else 0
     steps_html = ""
     for i, name in enumerate(step_names):
@@ -336,12 +245,12 @@ def render_progress_bar(current_step, total_steps, step_names):
         steps_html += f'<span class="progress-step {css_class}">{name}</span>'
     st.markdown(f"""
     <div class="progress-container">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.85rem; font-weight: 600; color: #e6edf3;">Questionnaire</span>
-            <span style="font-size: 0.8rem; color: #8b949e;">{current_step + 1} / {total_steps}</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.85rem; font-weight:600; color:#e6edf3;">Questionnaire</span>
+            <span style="font-size:0.8rem; color:#8b949e;">{current_step + 1} / {total_steps}</span>
         </div>
         <div class="progress-bar-bg">
-            <div class="progress-bar-fill" style="width: {pct}%;"></div>
+            <div class="progress-bar-fill" style="width:{pct}%;"></div>
         </div>
         <div class="progress-steps">{steps_html}</div>
     </div>
@@ -361,28 +270,31 @@ def render_step_header(number, title, subtitle, icon_key="target"):
     """, unsafe_allow_html=True)
 
 
-# radar chart avec Chart.js — profil utilisateur + ligne cible 70%
+# radar chart responsive Chart.js — maintainAspectRatio false pour s'adapter au conteneur
 def render_chartjs_radar(labels, values, title=""):
     labels_json = json.dumps(labels)
     values_json = json.dumps([round(v * 100, 1) for v in values])
     target_json = json.dumps([70] * len(labels))
-    safe_id = title.replace(' ', '_').replace("'", "").replace('"', '').replace('—', '')
+    safe_id = title.replace(' ', '_').replace("'", "").replace('"', '').replace('—', '').replace(' ', '_')
     html = f"""
-    <div style="background: #161b22; border-radius: 12px; padding: 20px; border: 1px solid #21262d;">
-        <canvas id="radar_{safe_id}" width="400" height="350"></canvas>
-        <div style="display:flex;gap:20px;justify-content:center;margin-top:8px;font-size:12px;color:#8b949e;">
+    <div style="background:#161b22; border-radius:12px; padding:20px; border:1px solid #21262d; width:100%; box-sizing:border-box;">
+        <div style="position:relative; width:100%; height:420px;">
+            <canvas id="radar_{safe_id}"></canvas>
+        </div>
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:12px;font-size:12px;color:#8b949e;">
             <span style="display:flex;align-items:center;gap:6px;">
                 <span style="width:14px;height:3px;background:#58a6ff;border-radius:2px;display:inline-block;"></span>Votre profil
             </span>
             <span style="display:flex;align-items:center;gap:6px;">
-                <span style="width:14px;height:2px;background:#3fb950;border-radius:2px;display:inline-block;border-top:2px dashed #3fb950;"></span>Seuil maitrise (70%)
+                <span style="width:14px;height:2px;background:#3fb950;border-radius:2px;display:inline-block;border-top:2px dashed #3fb950;"></span>Seuil maîtrise (70%)
             </span>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
-        var ctx = document.getElementById('radar_{safe_id}').getContext('2d');
-        new Chart(ctx, {{
+    (function() {{
+        var canvas = document.getElementById('radar_{safe_id}');
+        new Chart(canvas, {{
             type: 'radar',
             data: {{
                 labels: {labels_json},
@@ -391,36 +303,27 @@ def render_chartjs_radar(labels, values, title=""):
                         label: 'Votre profil',
                         data: {values_json},
                         backgroundColor: 'rgba(88, 166, 255, 0.15)',
-                        borderColor: '#58a6ff',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#58a6ff',
-                        pointBorderColor: '#0d1117',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
+                        borderColor: '#58a6ff', borderWidth: 2.5,
+                        pointBackgroundColor: '#58a6ff', pointBorderColor: '#0d1117',
+                        pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7,
                     }},
                     {{
                         label: 'Seuil maitrise',
                         data: {target_json},
                         backgroundColor: 'rgba(63, 185, 80, 0.05)',
-                        borderColor: '#3fb950',
-                        borderWidth: 1.5,
-                        borderDash: [6, 4],
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
+                        borderColor: '#3fb950', borderWidth: 1.5,
+                        borderDash: [6, 4], pointRadius: 0, pointHoverRadius: 0,
                     }}
                 ]
             }},
             options: {{
-                responsive: true,
-                maintainAspectRatio: true,
+                responsive: true, maintainAspectRatio: false,
                 plugins: {{
                     legend: {{ display: false }},
                     title: {{
-                        display: true,
-                        text: '{title}',
-                        color: '#e6edf3',
-                        font: {{ size: 14, family: "'Inter', sans-serif", weight: '600' }}
+                        display: true, text: '{title}', color: '#e6edf3',
+                        font: {{ size: 15, family: "'Inter', sans-serif", weight: '600' }},
+                        padding: {{ bottom: 16 }}
                     }},
                     tooltip: {{
                         callbacks: {{
@@ -434,20 +337,21 @@ def render_chartjs_radar(labels, values, title=""):
                 scales: {{
                     r: {{
                         min: 0, max: 100,
-                        ticks: {{ stepSize: 25, color: '#484f58', backdropColor: 'transparent', font: {{ size: 10 }}, callback: function(v) {{ return v + '%'; }} }},
+                        ticks: {{ stepSize: 25, color: '#484f58', backdropColor: 'transparent', font: {{ size: 11 }}, callback: function(v) {{ return v + '%'; }} }},
                         grid: {{ color: '#21262d', lineWidth: 1 }},
                         angleLines: {{ color: '#21262d', lineWidth: 1 }},
-                        pointLabels: {{ color: '#8b949e', font: {{ size: 11, family: "'Inter', sans-serif" }} }}
+                        pointLabels: {{ color: '#c9d1d9', font: {{ size: 12, family: "'Inter', sans-serif", weight: '500' }} }}
                     }}
                 }}
             }}
         }});
+    }})();
     </script>
     """
-    components.html(html, height=460)
+    components.html(html, height=500)
 
 
-# bar chart horizontal avec Chart.js — couleurs par niveau + ligne cible 70%
+# bar chart horizontal Chart.js avec ligne cible 70%
 def render_chartjs_bar(labels, values, title=""):
     labels_json = json.dumps(labels)
     values_json = json.dumps([round(v * 100, 1) for v in values])
@@ -455,32 +359,26 @@ def render_chartjs_bar(labels, values, title=""):
     safe_id = title.replace(' ', '_').replace("'", "").replace('"', '').replace('—', '')
     bar_h = max(200, len(labels) * 52 + 60)
     html = f"""
-    <div style="background: #161b22; border-radius: 12px; padding: 20px; border: 1px solid #21262d;">
+    <div style="background:#161b22; border-radius:12px; padding:20px; border:1px solid #21262d;">
         <canvas id="bar_{safe_id}" width="400" height="{bar_h}"></canvas>
         <div style="display:flex;gap:20px;margin-top:8px;font-size:12px;color:#8b949e;">
-            <span style="color:#3fb950;">■ Maitrise (≥70%)</span>
+            <span style="color:#3fb950;">■ Maîtrise (≥70%)</span>
             <span style="color:#d29922;">■ En cours (45-69%)</span>
-            <span style="color:#f85149;">■ A developper (&lt;45%)</span>
+            <span style="color:#f85149;">■ À développer (&lt;45%)</span>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3/dist/chartjs-plugin-annotation.min.js"></script>
     <script>
         var ctx = document.getElementById('bar_{safe_id}').getContext('2d');
         new Chart(ctx, {{
             type: 'bar',
             data: {{
                 labels: {labels_json},
-                datasets: [{{
-                    data: {values_json},
-                    backgroundColor: {colors},
-                    borderRadius: 6,
-                    barThickness: 32
-                }}]
+                datasets: [{{ data: {values_json}, backgroundColor: {colors}, borderRadius: 6, barThickness: 32 }}]
             }},
             options: {{
-                responsive: true,
-                indexAxis: 'y',
+                responsive: true, indexAxis: 'y',
                 plugins: {{
                     legend: {{ display: false }},
                     title: {{ display: true, text: '{title}', color: '#e6edf3', font: {{ size: 14, family: "'Inter', sans-serif", weight: '600' }} }},
@@ -505,7 +403,6 @@ def render_chartjs_bar(labels, values, title=""):
     components.html(html, height=bar_h + 80)
 
 
-# profils de test pre-definis
 TEST_PROFILES = {
     "-- Aucun (remplir manuellement) --": None,
     "Data Scientist": {
@@ -581,26 +478,25 @@ TEST_PROFILES = {
 
 # header
 st.markdown(f"""
-<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+<div style="display:flex; align-items:center; gap:12px; margin-bottom:8px; width:100%;">
     {ICONS['target']}
-    <h1 style="margin: 0; padding: 0;">AISCA</h1>
+    <h1 style="margin:0; padding:0;">AISCA</h1>
 </div>
-<p style="color: #8b949e; font-size: 0.9rem; margin-top: 0; margin-bottom: 24px;">
+<p style="color:#8b949e; font-size:0.9rem; margin-top:0; margin-bottom:24px; width:100%;">
     Agent Intelligent de Cartographie des Competences
 </p>
 """, unsafe_allow_html=True)
 
-# mode resultats
+# ─────────────────────────────────────────────────────────────────────
+# MODE RÉSULTATS
+# ─────────────────────────────────────────────────────────────────────
 if st.session_state.show_results and st.session_state.results_data:
-    rd = st.session_state.results_data
-    top_jobs = rd["top_jobs"]
-    user_text = rd["user_text"]
+    rd          = st.session_state.results_data
+    top_jobs    = rd["top_jobs"]
+    user_text   = rd["user_text"]
     comp_scores = rd["comp_scores"]
 
-    if st.button("← Nouveau questionnaire", use_container_width=False):
-        # On efface toutes les clés liées au formulaire pour repartir d'une ardoise vierge.
-        # Sans ça, les valeurs du profil précédent restent en session_state et polluent
-        # le prochain questionnaire même si on change de profil de test.
+    if st.button("← Nouveau questionnaire", use_container_width=False, type="secondary"):
         keys_to_clear = [
             "business", "finance", "design", "communication", "data_analysis",
             "ml", "dev", "engineering", "_juridique_level",
@@ -612,197 +508,222 @@ if st.session_state.show_results and st.session_state.results_data:
         ]
         for k in keys_to_clear:
             st.session_state.pop(k, None)
-        st.session_state.show_results   = False
-        st.session_state.results_data   = None
-        st.session_state.current_step   = 0
+        st.session_state.show_results    = False
+        st.session_state.results_data    = None
+        st.session_state.current_step    = 0
         st.session_state.selected_profile = "-- Aucun (remplir manuellement) --"
         st.session_state.pop("selected_job_idx", None)
         st.rerun()
 
     st.markdown("---")
+    st.markdown(f'<div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">{ICONS["award"]}<h2 style="margin:0;">Resultats de l\'analyse</h2></div>', unsafe_allow_html=True)
 
-    st.markdown(f'<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">{ICONS["award"]}<h2 style="margin: 0;">Resultats de l\'analyse</h2></div>', unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-    overall_score    = top_jobs[0]['score'] if top_jobs else 0
-    job_blocs        = top_jobs[0]['blocs']
-    nb_fortes        = sum(1 for b in job_blocs if b['score'] >= 0.7)
-    nb_total         = len(job_blocs)
+    col1, col2, col3    = st.columns(3)
+    overall_score        = top_jobs[0]['score'] if top_jobs else 0
+    job_blocs            = top_jobs[0]['blocs']
+    nb_fortes            = sum(1 for b in job_blocs if b['score'] >= 0.7)
+    nb_total             = len(job_blocs)
     bloc_principal_score = float(job_blocs[0]['score']) if job_blocs else 0.0
     bloc_principal_nom   = job_blocs[0]['nom'] if job_blocs else "—"
     with col1:
-        st.metric(
-            f"Adequation — {top_jobs[0]['titre']}",
-            f"{overall_score:.0%}",
-            help="Score de match global entre votre profil et ce metier"
-        )
+        st.metric(f"Adequation — {top_jobs[0]['titre']}", f"{overall_score:.0%}",
+                  help="Score de match global entre votre profil et ce metier")
     with col2:
-        st.metric(
-            "Blocs maitrisés / requis",
-            f"{nb_fortes} / {nb_total}",
-            help=f"Blocs >= 70% parmi les {nb_total} blocs requis par ce metier"
-        )
+        st.metric("Blocs maitrisés / requis", f"{nb_fortes} / {nb_total}",
+                  help=f"Blocs >= 70% parmi les {nb_total} blocs requis par ce metier")
     with col3:
-        st.metric(
-            "Bloc principal",
-            f"{bloc_principal_score:.0%}",
-            help=f"Score sur {bloc_principal_nom} — le bloc le plus important pour ce metier"
-        )
+        st.metric("Bloc principal", f"{bloc_principal_score:.0%}",
+                  help=f"Score sur {bloc_principal_nom} — le bloc le plus important pour ce metier")
 
     st.markdown("---")
-    st.markdown(f'<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">{ICONS["trending"]}<h2 style="margin: 0;">Top 3 des metiers recommandes</h2></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">{ICONS["trending"]}<h2 style="margin:0;">Top 3 des metiers recommandes</h2></div>', unsafe_allow_html=True)
 
-    # Sélecteur de métier — 3 cards cliquables en ligne au lieu des tabs compressés
-    # Chaque card affiche le rang, le titre et le score avec une barre de progression visuelle
     medal_colors = ["#f5a623", "#8b949e", "#cd7f32"]
     medal_labels = ["#1", "#2", "#3"]
 
     if "selected_job_idx" not in st.session_state:
         st.session_state.selected_job_idx = 0
 
-    cards_html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">'
+    cards_html = '<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px;">'
     for i, job in enumerate(top_jobs):
-        is_active  = (i == st.session_state.selected_job_idx)
-        border     = f"2px solid {medal_colors[i]}" if is_active else "1px solid #21262d"
-        bg         = "#161b22" if is_active else "#0d1117"
-        pct        = int(job['score'] * 100)
-        bar_fill   = medal_colors[i]
+        is_active = (i == st.session_state.selected_job_idx)
+        border    = f"2px solid {medal_colors[i]}" if is_active else "1px solid #21262d"
+        bg        = "#161b22" if is_active else "#0d1117"
+        pct       = int(job['score'] * 100)
         cards_html += f"""
-        <div style="background:{bg}; border:{border}; border-radius:12px; padding:16px 20px; cursor:pointer; transition:all 0.2s;">
+        <div style="background:{bg}; border:{border}; border-radius:12px; padding:16px 20px;">
             <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
                 <span style="font-size:1.1rem; font-weight:700; color:{medal_colors[i]};">{medal_labels[i]}</span>
                 <span style="font-size:0.95rem; font-weight:600; color:#e6edf3; line-height:1.3;">{job['titre']}</span>
             </div>
             <div style="font-size:1.4rem; font-weight:700; color:{medal_colors[i]}; margin-bottom:8px;">{pct}%</div>
-            <div style="background:#21262d; border-radius:4px; height:5px; width:100%;">
-                <div style="background:{bar_fill}; border-radius:4px; height:5px; width:{pct}%;"></div>
+            <div style="background:#21262d; border-radius:4px; height:5px;">
+                <div style="background:{medal_colors[i]}; border-radius:4px; height:5px; width:{pct}%;"></div>
             </div>
         </div>"""
     cards_html += '</div>'
     st.markdown(cards_html, unsafe_allow_html=True)
 
-    # Boutons de sélection sous les cards (Streamlit ne permet pas de cliquer sur du HTML)
     sel_cols = st.columns(3)
     for i, (col, job) in enumerate(zip(sel_cols, top_jobs)):
         with col:
-            label = f"Voir #{i+1}" if i != st.session_state.selected_job_idx else f"✓ #{i+1} sélectionné"
+            label = f"✓ #{i+1} sélectionné" if i == st.session_state.selected_job_idx else f"Voir #{i+1}"
             if st.button(label, key=f"job_select_{i}", use_container_width=True,
                          type="primary" if i == st.session_state.selected_job_idx else "secondary"):
                 st.session_state.selected_job_idx = i
                 st.rerun()
 
-    # Détail du métier sélectionné
     job          = top_jobs[st.session_state.selected_job_idx]
-    i            = st.session_state.selected_job_idx
+    i_job        = st.session_state.selected_job_idx
     global_score = float(job['score'])
 
     st.markdown(f"""
-    <div style="background:#161b22; border:1px solid #21262d; border-radius:12px; padding:24px; margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px;">
-            <span style="font-size:1.5rem; font-weight:700; color:{medal_colors[i]};">#{i+1}</span>
-            <span style="font-size:1.3rem; font-weight:700; color:#e6edf3;">{job['titre']}</span>
+    <div style="background:#161b22; border:1px solid #21262d; border-left:4px solid {medal_colors[i_job]};
+                border-radius:12px; padding:20px 24px; margin:20px 0 8px 0;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+            <span style="font-size:1.4rem; font-weight:700; color:{medal_colors[i_job]};">#{i_job+1}</span>
+            <span style="font-size:1.25rem; font-weight:700; color:#e6edf3;">{job['titre']}</span>
+            <span style="margin-left:auto; font-size:1.6rem; font-weight:800; color:{medal_colors[i_job]};">{global_score:.0%}</span>
         </div>
-        {'<p style="color:#8b949e; font-size:0.9rem; margin:0 0 4px 0;">' + job['description'] + '</p>' if job.get('description') else ''}
+        {'<p style="color:#8b949e; font-size:0.88rem; margin:0;">' + job['description'] + '</p>' if job.get('description') else ''}
     </div>
     """, unsafe_allow_html=True)
 
-    col1, col2 = st.columns([2, 1])
-    with col1:
+    col_chart, col_detail = st.columns([3, 2])
+
+    with col_chart:
         if job.get('blocs') and len(job['blocs']) > 0:
             labels = [b['nom'] for b in job['blocs']]
             values = [float(b['score']) for b in job['blocs']]
             if len(labels) >= 3:
-                render_chartjs_radar(labels, values, f"Competences requises — {job['titre']}")
+                render_chartjs_radar(labels, values, f"Cartographie — {job['titre']}")
             else:
-                render_chartjs_bar(labels, values, f"Adequation aux blocs — {job['titre']}")
-    with col2:
-        st.metric("Score global", f"{global_score:.0%}")
-        if i < len(top_jobs) - 1:
-            delta = global_score - float(top_jobs[i+1]['score'])
-            st.metric(f"Ecart avec #{i+2}", f"+{delta:.1%}")
-        st.markdown("---")
-        st.markdown("**Adequation par bloc**")
+                render_chartjs_bar(labels, values, f"Adequation — {job['titre']}")
+
+    with col_detail:
+        st.markdown("#### Compétences par bloc")
+        # Pour chaque bloc requis : points forts (≥60%) et compétences à développer (<60%)
+        # issues directement des scores individuels comp_scores
         for bloc in job['blocs']:
             b_score = float(bloc['score'])
-            st.write(f"**{bloc['nom']}**")
-            st.progress(max(0.0, min(1.0, b_score)))
-            st.caption(f"{b_score:.0%}")
+            b_nom   = bloc['nom']
+            b_label = "Maîtrise" if b_score >= 0.70 else "En cours" if b_score >= 0.45 else "À développer"
+
+            bloc_comps = sorted([
+                (comp_idx[cid]['texte'], score)
+                for cid, score in comp_scores.items()
+                if cid in comp_idx and comp_idx[cid]['bloc_nom'] == b_nom
+            ], key=lambda x: -x[1])
+
+            with st.expander(f"{b_nom}  —  {b_score:.0%}  ·  {b_label}", expanded=(b_score < 0.70)):
+                acquises = [c for c in bloc_comps if c[1] >= 0.60][:3]
+                a_dev    = [c for c in bloc_comps if c[1] < 0.60][:4]
+
+                if acquises:
+                    st.markdown('<p style="color:#3fb950; font-size:0.8rem; font-weight:600; margin:0 0 6px;">✓ Points forts</p>', unsafe_allow_html=True)
+                    for texte, score in acquises:
+                        st.markdown(f"""
+                        <div style="display:flex; justify-content:space-between; align-items:center;
+                                    padding:5px 0; border-bottom:1px solid #21262d; font-size:0.82rem;">
+                            <span style="color:#e6edf3; flex:1; padding-right:10px;">{texte}</span>
+                            <span style="color:#3fb950; font-weight:600; white-space:nowrap;">{score:.0%}</span>
+                        </div>""", unsafe_allow_html=True)
+
+                if a_dev:
+                    st.markdown('<p style="color:#f85149; font-size:0.8rem; font-weight:600; margin:10px 0 6px;">↑ À développer</p>', unsafe_allow_html=True)
+                    for texte, score in a_dev:
+                        st.markdown(f"""
+                        <div style="display:flex; justify-content:space-between; align-items:center;
+                                    padding:5px 0; border-bottom:1px solid #21262d; font-size:0.82rem;">
+                            <span style="color:#8b949e; flex:1; padding-right:10px;">{texte}</span>
+                            <span style="color:#f85149; font-weight:600; white-space:nowrap;">{score:.0%}</span>
+                        </div>""", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown(f'<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">{ICONS["book"]}<h2 style="margin: 0;">Recommandations</h2></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">{ICONS["book"]}<h2 style="margin:0;">Recommandations</h2></div>', unsafe_allow_html=True)
 
-    col1, col2 = st.columns([3, 2])
-    with col1:
-        st.markdown("#### Plan de progression")
-        weak_blocs   = {b['nom']: b['score'] for b in top_jobs[0]['blocs'] if b['score'] < 0.6}
-        strong_blocs = {b['nom']: b['score'] for b in top_jobs[0]['blocs'] if b['score'] >= 0.6}
+    job_sel      = top_jobs[0]
+    weak_blocs   = {b['nom']: b['score'] for b in job_sel['blocs'] if b['score'] < 0.6}
+    strong_blocs = {b['nom']: b['score'] for b in job_sel['blocs'] if b['score'] >= 0.6}
+
+    col_plan, col_bio = st.columns([3, 2])
+
+    with col_plan:
+        st.markdown("#### Plan de progression personnalisé")
+
         if weak_blocs:
-            with st.spinner("Generation du plan personnalise..."):
-                # on passe tout le profil brut a gemini pour une analyse croisee quanti + semantique
+            with st.spinner("Generation du plan..."):
+                # compétences individuelles les plus faibles pour un plan concret
+                comps_a_dev = []
+                for b in job_sel['blocs']:
+                    if b['score'] < 0.6:
+                        blk_comps = sorted([
+                            (comp_idx[cid]['texte'], s)
+                            for cid, s in comp_scores.items()
+                            if cid in comp_idx and comp_idx[cid]['bloc_nom'] == b['nom']
+                        ], key=lambda x: x[1])[:3]
+                        comps_a_dev.extend([t for t, _ in blk_comps])
+
+                # on passe tout le profil brut + compétences spécifiques à Gemini
                 user_profile_data = {
-                    "likert_levels":  rd.get("likert_levels", {}),
-                    "outils":         rd.get("outils", {}),
-                    "soft_skills":    rd.get("soft_skills", {}),
-                    "textes_libres":  rd.get("textes_libres", {}),
-                    "formation":      rd.get("formation", {}),
+                    "likert_levels": rd.get("likert_levels", {}),
+                    "outils":        rd.get("outils", {}),
+                    "soft_skills":   rd.get("soft_skills", {}),
+                    "textes_libres": rd.get("textes_libres", {}),
+                    "formation":     rd.get("formation", {}),
+                    "comps_a_dev":   comps_a_dev[:8],
                 }
                 learning_path = generate_learning_path(
-                    weak_blocs, strong_blocs, top_jobs[0]['titre'], user_profile_data
+                    weak_blocs, strong_blocs, job_sel['titre'], user_profile_data
                 )
             st.markdown(learning_path)
         else:
             st.success("Excellent ! Vous maitrisez deja tous les blocs requis pour ce metier.")
 
-    with col2:
+    with col_bio:
         st.markdown("#### Bio professionnelle")
         if not strong_blocs:
-            best = max(top_jobs[0]['blocs'], key=lambda b: b['score'])
+            best = max(job_sel['blocs'], key=lambda b: b['score'])
             strong_blocs = {best['nom']: best['score']}
         with st.spinner("Redaction..."):
             bio = generate_professional_bio(
-                strong_blocs, top_jobs[0]['titre'],
+                strong_blocs, job_sel['titre'],
                 {"projet_tech": rd.get("projet_tech", ""), "objectif": rd.get("objectif", "")}
             )
         st.info(bio)
-        st.download_button("Telecharger ma bio", bio, file_name="bio_aisca.txt", mime="text/plain", use_container_width=True)
+        st.download_button("Télécharger ma bio", bio, file_name="bio_aisca.txt",
+                           mime="text/plain", use_container_width=True)
 
     st.markdown("---")
-    st.markdown(f"**Tableau récapitulatif** — blocs requis pour : *{top_jobs[0]['titre']}*")
+    st.markdown(f"**Tableau récapitulatif** — blocs requis pour : *{job_sel['titre']}*")
     df_scores = pd.DataFrame([
         {
-            "Rang":                    f"#{idx+1}",
-            "Bloc de competences":     b['nom'],
-            "Score":                   f"{b['score']:.0%}",
-            "Niveau":                  (
-                "Maitrise"       if b['score'] >= 0.70 else
-                "En cours"       if b['score'] >= 0.45 else
-                "A developper"
-            ),
-            "Priorite pour le metier": (
-                "Bloc principal"      if idx == 0 else
-                "Bloc secondaire"     if idx == 1 else
-                "Bloc complementaire"
-            )
+            "Rang":     f"#{idx+1}",
+            "Bloc":     b['nom'],
+            "Score":    f"{b['score']:.0%}",
+            "Niveau":   ("✓ Maîtrise" if b['score'] >= 0.70 else "~ En cours" if b['score'] >= 0.45 else "↑ À développer"),
+            "Priorité": ("Bloc principal" if idx == 0 else "Bloc secondaire" if idx == 1 else "Bloc complémentaire")
         }
-        for idx, b in enumerate(top_jobs[0]['blocs'])
+        for idx, b in enumerate(job_sel['blocs'])
     ])
     st.dataframe(df_scores, use_container_width=True, hide_index=True)
 
-    with st.expander("Details techniques", expanded=False):
-        st.write(f"**Mots :** {len(user_text.split())} | **Caracteres :** {len(user_text)}")
-        st.text_area("Texte envoye au modele :", user_text, height=150)
+    with st.expander("Détails techniques", expanded=False):
+        st.write(f"**Mots :** {len(user_text.split())} | **Caractères :** {len(user_text)}")
+        st.text_area("Texte envoyé au modèle :", user_text, height=150)
         if comp_scores:
             top_comps = sorted(comp_scores.items(), key=lambda x: -x[1])[:10]
-            st.write("**Top 10 competences :**")
+            st.write("**Top 10 compétences matchées :**")
             for cid, score in top_comps:
                 if cid in comp_idx:
                     st.write(f"- {comp_idx[cid]['texte']} : {score:.2%}")
 
+# ─────────────────────────────────────────────────────────────────────
+# MODE QUESTIONNAIRE (wizard 6 étapes, widgets libres sans st.form)
+# ─────────────────────────────────────────────────────────────────────
 else:
-    # Mode questionnaire — Solution 1 : widgets libres sans st.form
-    # Sans st.form, chaque widget écrit directement dans session_state à chaque interaction.
-    # Les profils de test se préremplissent donc immédiatement car les widgets lisent
-    # session_state à chaque rerun, sans snapshot figé au moment de la création du form.
+    # Sans st.form, chaque widget écrit directement dans session_state.
+    # Les profils de test se préremplissent immédiatement : pas de snapshot figé.
 
     if "selected_profile" not in st.session_state:
         st.session_state.selected_profile = "-- Aucun (remplir manuellement) --"
@@ -819,8 +740,6 @@ else:
         if selected_profile != "-- Aucun (remplir manuellement) --":
             profile = TEST_PROFILES[selected_profile]
             if profile:
-                # on efface _juridique_level avant de charger le profil
-                # pour éviter qu'il persiste d'un profil Juriste vers un autre
                 st.session_state.pop("_juridique_level", None)
                 for k, v in profile.items():
                     st.session_state[k] = v
@@ -832,7 +751,6 @@ else:
     current = st.session_state.current_step
     render_progress_bar(current, len(STEP_NAMES), STEP_NAMES)
 
-    # Conteneur visuel pour le step courant — remplace le st.form
     with st.container(border=True):
 
         if current == 0:
@@ -841,18 +759,15 @@ else:
             with col1:
                 st.multiselect("Business & juridique",
                     ["Juridique", "Business et Stratégie", "Marketing et Vente", "Finance et Comptabilité"],
-                    default=st.session_state.get("domaines_col1", []),
-                    key="domaines_col1")
+                    default=st.session_state.get("domaines_col1", []), key="domaines_col1")
             with col2:
                 st.multiselect("Creatif & communication",
                     ["Communication et Médias", "Création et Design", "Digital et Réseaux Sociaux"],
-                    default=st.session_state.get("domaines_col2", []),
-                    key="domaines_col2")
+                    default=st.session_state.get("domaines_col2", []), key="domaines_col2")
             with col3:
                 st.multiselect("Technique & data",
                     ["Data Analysis", "Machine Learning et IA", "Développement et Infrastructure", "Ingénierie et Technique"],
-                    default=st.session_state.get("domaines_col3", []),
-                    key="domaines_col3")
+                    default=st.session_state.get("domaines_col3", []), key="domaines_col3")
 
         elif current == 1:
             render_step_header(2, "Auto-evaluation technique", "Evaluez votre niveau dans chaque domaine", "sliders")
@@ -987,11 +902,10 @@ else:
                     placeholder="Ex : Banque, E-commerce...",
                     value=st.session_state.get("secteur", ""), key="secteur")
 
-    # Navigation — boutons hors du container pour être toujours visibles
     col_prev, col_spacer, col_next = st.columns([1, 2, 1])
     with col_prev:
         if current > 0:
-            if st.button("Precedent", use_container_width=True):
+            if st.button("Précédent", use_container_width=True):
                 st.session_state.current_step -= 1
                 st.rerun()
     with col_next:
@@ -1000,7 +914,6 @@ else:
                 st.session_state.current_step += 1
                 st.rerun()
         else:
-            # Dernière étape — bouton Analyser remplace Suivant
             if st.button("Analyser mon profil", use_container_width=True, type="primary"):
 
                 likert_levels = {
@@ -1076,33 +989,34 @@ else:
                         "comp_scores": comp_scores,
                         "projet_tech": _projet,
                         "objectif":    _objectif,
-                        # on stocke tout le profil brut pour le plan de progression gemini
+                        # profil brut structuré — utilisé par generate_learning_path
+                        # pour un plan de progression concret et personnalisé
                         "likert_levels": dict(likert_levels),
                         "outils": {
-                            "Data & Analytics": st.session_state.get("outils_data", []),
-                            "IA & Machine Learning": st.session_state.get("outils_ml", []),
-                            "Dev & Cloud": st.session_state.get("outils_dev", []),
-                            "Design & Creativite": st.session_state.get("outils_design", []),
+                            "Data & Analytics":          st.session_state.get("outils_data",      []),
+                            "IA & Machine Learning":     st.session_state.get("outils_ml",        []),
+                            "Dev & Cloud":               st.session_state.get("outils_dev",       []),
+                            "Design & Creativite":       st.session_state.get("outils_design",    []),
                             "Marketing & Communication": st.session_state.get("outils_marketing", []),
                         },
                         "soft_skills": {
-                            "Rigueur / Creativite": st.session_state.get("rigueur", ""),
-                            "Leadership": st.session_state.get("leadership", ""),
-                            "Persuasion": st.session_state.get("persuasion", ""),
-                            "Empathie": st.session_state.get("empathie", ""),
+                            "Rigueur / Creativite": st.session_state.get("rigueur",    ""),
+                            "Leadership":           st.session_state.get("leadership", ""),
+                            "Persuasion":           st.session_state.get("persuasion", ""),
+                            "Empathie":             st.session_state.get("empathie",   ""),
                         },
                         "textes_libres": {
-                            "Projet dont il est fier": _projet,
-                            "Journee ideale": _journee,
+                            "Projet dont il est fier":     _projet,
+                            "Journee ideale":              _journee,
                             "Domaines qui le passionnent": _interet,
-                            "Defis qui le stimulent": _defis,
-                            "Objectif de carriere": _objectif,
+                            "Defis qui le stimulent":      _defis,
+                            "Objectif de carriere":        _objectif,
                         },
                         "formation": {
-                            "Niveau d'etudes": st.session_state.get("etudes", ""),
-                            "Domaine de formation": st.session_state.get("formation", ""),
+                            "Niveau d'etudes":            st.session_state.get("etudes",     ""),
+                            "Domaine de formation":       st.session_state.get("formation",  ""),
                             "Experience professionnelle": st.session_state.get("experience", ""),
-                            "Secteur d'activite": st.session_state.get("secteur", ""),
+                            "Secteur d'activite":         st.session_state.get("secteur",    ""),
                         },
                     }
                     st.session_state.show_results = True
@@ -1110,4 +1024,4 @@ else:
 
 # footer
 st.markdown("---")
-st.markdown('<p style="color: #484f58; font-size: 0.75rem; text-align: center;">OSCC - 2026 | EFREI - Master Data Engineering & AI | Projet IA Generative</p>', unsafe_allow_html=True)
+st.markdown('<p style="color:#484f58; font-size:0.75rem; text-align:center;">AISCA - 2026 | EFREI - Master Data Engineering & AI | Projet IA Generative</p>', unsafe_allow_html=True)
