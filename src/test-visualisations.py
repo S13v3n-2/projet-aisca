@@ -275,76 +275,95 @@ def render_chartjs_radar(labels, values, title=""):
     labels_json = json.dumps(labels)
     values_json = json.dumps([round(v * 100, 1) for v in values])
     target_json = json.dumps([70] * len(labels))
-    safe_id = title.replace(' ', '_').replace("'", "").replace('"', '').replace('—', '').replace(' ', '_')
+    safe_id     = title.replace(' ','_').replace("'","").replace('"','').replace('—','')
     html = f"""
-    <div style="background:#161b22; border-radius:12px; padding:20px; border:1px solid #21262d; width:100%; box-sizing:border-box;">
-        <div style="position:relative; width:100%; height:420px;">
+    <div style="background:#161b22;border-radius:12px;padding:20px;border:1px solid #21262d;
+                width:100%;box-sizing:border-box;">
+        <div style="position:relative;width:100%;height:420px;">
             <canvas id="radar_{safe_id}"></canvas>
         </div>
-        <div style="display:flex;gap:20px;justify-content:center;margin-top:12px;font-size:12px;color:#8b949e;">
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:12px;
+                    font-size:12px;color:#8b949e;">
             <span style="display:flex;align-items:center;gap:6px;">
-                <span style="width:14px;height:3px;background:#58a6ff;border-radius:2px;display:inline-block;"></span>Votre profil
+                <span style="width:14px;height:3px;background:#58a6ff;border-radius:2px;
+                             display:inline-block;"></span>Votre profil
             </span>
             <span style="display:flex;align-items:center;gap:6px;">
-                <span style="width:14px;height:2px;background:#3fb950;border-radius:2px;display:inline-block;border-top:2px dashed #3fb950;"></span>Seuil maîtrise (70%)
+                <span style="width:14px;height:2px;background:#3fb950;border-radius:2px;
+                             display:inline-block;border-top:2px dashed #3fb950;"></span>Seuil maîtrise (70%)
             </span>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
     (function() {{
-        var canvas = document.getElementById('radar_{safe_id}');
-        new Chart(canvas, {{
-            type: 'radar',
-            data: {{
-                labels: {labels_json},
-                datasets: [
-                    {{
-                        label: 'Votre profil',
-                        data: {values_json},
-                        backgroundColor: 'rgba(88, 166, 255, 0.15)',
-                        borderColor: '#58a6ff', borderWidth: 2.5,
-                        pointBackgroundColor: '#58a6ff', pointBorderColor: '#0d1117',
-                        pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7,
-                    }},
-                    {{
-                        label: 'Seuil maitrise',
-                        data: {target_json},
-                        backgroundColor: 'rgba(63, 185, 80, 0.05)',
-                        borderColor: '#3fb950', borderWidth: 1.5,
-                        borderDash: [6, 4], pointRadius: 0, pointHoverRadius: 0,
-                    }}
-                ]
-            }},
-            options: {{
-                responsive: true, maintainAspectRatio: false,
-                plugins: {{
-                    legend: {{ display: false }},
-                    title: {{
-                        display: true, text: '{title}', color: '#e6edf3',
-                        font: {{ size: 15, family: "'Inter', sans-serif", weight: '600' }},
-                        padding: {{ bottom: 16 }}
-                    }},
-                    tooltip: {{
-                        callbacks: {{
-                            label: function(ctx) {{
-                                if (ctx.dataset.label === 'Seuil maitrise') return null;
-                                return ctx.dataset.label + ' : ' + ctx.raw + '%';
+        function buildChart() {{
+            var canvas = document.getElementById('radar_{safe_id}');
+            if (!canvas) {{ setTimeout(buildChart, 50); return; }}
+            new Chart(canvas, {{
+                type: 'radar',
+                data: {{
+                    labels: {labels_json},
+                    datasets: [
+                        {{
+                            label: 'Votre profil',
+                            data: {values_json},
+                            backgroundColor: 'rgba(88,166,255,0.15)',
+                            borderColor: '#58a6ff', borderWidth: 2.5,
+                            pointBackgroundColor: '#58a6ff', pointBorderColor: '#0d1117',
+                            pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7,
+                        }},
+                        {{
+                            label: 'Seuil maitrise',
+                            data: {target_json},
+                            backgroundColor: 'rgba(63,185,80,0.05)',
+                            borderColor: '#3fb950', borderWidth: 1.5,
+                            borderDash: [6,4], pointRadius: 0, pointHoverRadius: 0,
+                        }}
+                    ]
+                }},
+                options: {{
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {{
+                        legend: {{ display: false }},
+                        title: {{
+                            display: true, text: {json.dumps(title)}, color: '#e6edf3',
+                            font: {{ size: 15, family: "'Inter',sans-serif", weight: '600' }},
+                            padding: {{ bottom: 16 }}
+                        }},
+                        tooltip: {{
+                            callbacks: {{
+                                label: function(ctx) {{
+                                    if (ctx.dataset.label === 'Seuil maitrise') return null;
+                                    return ctx.dataset.label + ' : ' + ctx.raw + '%';
+                                }}
                             }}
                         }}
-                    }}
-                }},
-                scales: {{
-                    r: {{
-                        min: 0, max: 100,
-                        ticks: {{ stepSize: 25, color: '#484f58', backdropColor: 'transparent', font: {{ size: 11 }}, callback: function(v) {{ return v + '%'; }} }},
-                        grid: {{ color: '#21262d', lineWidth: 1 }},
-                        angleLines: {{ color: '#21262d', lineWidth: 1 }},
-                        pointLabels: {{ color: '#c9d1d9', font: {{ size: 12, family: "'Inter', sans-serif", weight: '500' }} }}
+                    }},
+                    scales: {{
+                        r: {{
+                            min: 0, max: 100,
+                            ticks: {{ stepSize: 25, color: '#484f58', backdropColor: 'transparent',
+                                      font: {{ size: 11 }}, callback: function(v){{ return v+'%'; }} }},
+                            grid: {{ color: '#21262d', lineWidth: 1 }},
+                            angleLines: {{ color: '#21262d', lineWidth: 1 }},
+                            pointLabels: {{ color: '#c9d1d9',
+                                           font: {{ size: 12, family: "'Inter',sans-serif", weight: '500' }} }}
+                        }}
                     }}
                 }}
-            }}
-        }});
+            }});
+        }}
+
+        // Charge Chart.js puis construit le chart
+        if (typeof Chart !== 'undefined') {{
+            buildChart();
+        }} else {{
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+            s.onload = buildChart;
+            s.onerror = function() {{ console.error('Chart.js failed to load'); }};
+            document.head.appendChild(s);
+        }}
     }})();
     </script>
     """
@@ -355,11 +374,11 @@ def render_chartjs_radar(labels, values, title=""):
 def render_chartjs_bar(labels, values, title=""):
     labels_json = json.dumps(labels)
     values_json = json.dumps([round(v * 100, 1) for v in values])
-    colors = json.dumps(['#3fb950' if v >= 0.7 else '#d29922' if v >= 0.45 else '#f85149' for v in values])
-    safe_id = title.replace(' ', '_').replace("'", "").replace('"', '').replace('—', '')
-    bar_h = max(200, len(labels) * 52 + 60)
+    colors  = json.dumps(['#3fb950' if v >= 0.7 else '#d29922' if v >= 0.45 else '#f85149' for v in values])
+    safe_id = title.replace(' ','_').replace("'","").replace('"','').replace('—','')
+    bar_h   = max(200, len(labels) * 52 + 60)
     html = f"""
-    <div style="background:#161b22; border-radius:12px; padding:20px; border:1px solid #21262d;">
+    <div style="background:#161b22;border-radius:12px;padding:20px;border:1px solid #21262d;">
         <canvas id="bar_{safe_id}" width="400" height="{bar_h}"></canvas>
         <div style="display:flex;gap:20px;margin-top:8px;font-size:12px;color:#8b949e;">
             <span style="color:#3fb950;">■ Maîtrise (≥70%)</span>
@@ -367,37 +386,67 @@ def render_chartjs_bar(labels, values, title=""):
             <span style="color:#f85149;">■ À développer (&lt;45%)</span>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3/dist/chartjs-plugin-annotation.min.js"></script>
     <script>
-        var ctx = document.getElementById('bar_{safe_id}').getContext('2d');
-        new Chart(ctx, {{
-            type: 'bar',
-            data: {{
-                labels: {labels_json},
-                datasets: [{{ data: {values_json}, backgroundColor: {colors}, borderRadius: 6, barThickness: 32 }}]
-            }},
-            options: {{
-                responsive: true, indexAxis: 'y',
-                plugins: {{
-                    legend: {{ display: false }},
-                    title: {{ display: true, text: '{title}', color: '#e6edf3', font: {{ size: 14, family: "'Inter', sans-serif", weight: '600' }} }},
-                    annotation: {{
-                        annotations: {{
-                            cible: {{
-                                type: 'line', xMin: 70, xMax: 70,
-                                borderColor: '#3fb950', borderWidth: 1.5, borderDash: [6, 4],
-                                label: {{ content: 'Seuil 70%', display: true, position: 'start', color: '#3fb950', font: {{ size: 10 }}, backgroundColor: 'transparent' }}
+    (function() {{
+        function buildBar() {{
+            var ctx = document.getElementById('bar_{safe_id}');
+            if (!ctx) {{ setTimeout(buildBar, 50); return; }}
+            new Chart(ctx.getContext('2d'), {{
+                type: 'bar',
+                data: {{
+                    labels: {labels_json},
+                    datasets: [{{ data: {values_json}, backgroundColor: {colors},
+                                 borderRadius: 6, barThickness: 32 }}]
+                }},
+                options: {{
+                    responsive: true, indexAxis: 'y',
+                    plugins: {{
+                        legend: {{ display: false }},
+                        title: {{ display: true, text: {json.dumps(title)}, color: '#e6edf3',
+                                  font: {{ size: 14, family: "'Inter',sans-serif", weight: '600' }} }},
+                        annotation: {{
+                            annotations: {{
+                                cible: {{
+                                    type: 'line', xMin: 70, xMax: 70,
+                                    borderColor: '#3fb950', borderWidth: 1.5, borderDash: [6,4],
+                                    label: {{ content: 'Seuil 70%', display: true, position: 'start',
+                                             color: '#3fb950', font: {{ size: 10 }},
+                                             backgroundColor: 'transparent' }}
+                                }}
                             }}
                         }}
+                    }},
+                    scales: {{
+                        x: {{ min: 0, max: 100,
+                              ticks: {{ color: '#484f58', callback: function(v){{ return v+'%'; }} }},
+                              grid: {{ color: '#21262d' }} }},
+                        y: {{ ticks: {{ color: '#8b949e', font: {{ size: 11 }} }},
+                              grid: {{ display: false }} }}
                     }}
-                }},
-                scales: {{
-                    x: {{ min: 0, max: 100, ticks: {{ color: '#484f58', callback: function(v) {{ return v + '%'; }} }}, grid: {{ color: '#21262d' }} }},
-                    y: {{ ticks: {{ color: '#8b949e', font: {{ size: 11 }} }}, grid: {{ display: false }} }}
                 }}
+            }});
+        }}
+
+        function loadAnnotation(cb) {{
+            if (typeof ChartAnnotation !== 'undefined' ||
+                (Chart.registry && Chart.registry.plugins.get('annotation'))) {{
+                cb(); return;
             }}
-        }});
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3/dist/chartjs-plugin-annotation.min.js';
+            s.onload = cb;
+            document.head.appendChild(s);
+        }}
+
+        if (typeof Chart !== 'undefined') {{
+            loadAnnotation(buildBar);
+        }} else {{
+            var s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+            s.onload = function() {{ loadAnnotation(buildBar); }};
+            document.head.appendChild(s);
+        }}
+    }})();
     </script>
     """
     components.html(html, height=bar_h + 80)
@@ -640,20 +689,90 @@ if st.session_state.show_results and st.session_state.results_data:
                         </div>""", unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown(f'<div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">{ICONS["book"]}<h2 style="margin:0;">Recommandations</h2></div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">{ICONS["book"]}<h2 style="margin:0;">Recommandations</h2></div>', unsafe_allow_html=True)
 
     job_sel      = top_jobs[0]
     weak_blocs   = {b['nom']: b['score'] for b in job_sel['blocs'] if b['score'] < 0.6}
     strong_blocs = {b['nom']: b['score'] for b in job_sel['blocs'] if b['score'] >= 0.6}
+    if not strong_blocs:
+        best = max(job_sel['blocs'], key=lambda b: b['score'])
+        strong_blocs = {best['nom']: best['score']}
 
+    # ── Projection avant/après ────────────────────────────────────────────
+    _rw          = [4.0, 2.0, 1.0, 0.5]
+    score_actuel = float(job_sel['score'])
+    blocs_list   = job_sel['blocs']
+    _tw          = sum(_rw[r] if r < len(_rw) else 0.25 for r in range(len(blocs_list)))
+    score_apres  = sum(
+        (_rw[r] if r < len(_rw) else 0.25) * (0.65 if blocs_list[r]['score'] < 0.6 else blocs_list[r]['score'])
+        for r in range(len(blocs_list))
+    ) / _tw if _tw else score_actuel
+    if weak_blocs and score_apres <= score_actuel:
+        score_apres = min(score_actuel + 0.15, 0.95)
+    delta = score_apres - score_actuel
+
+    st.markdown(f"""
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid #21262d;
+                border-radius:12px; overflow:hidden; margin-bottom:14px;">
+        <div style="padding:18px 24px; border-right:1px solid #21262d; background:#161b22;">
+            <p style="margin:0 0 4px; font-size:0.75rem; color:#8b949e; text-transform:uppercase; letter-spacing:0.06em;">Adéquation actuelle</p>
+            <p style="margin:0; font-size:2rem; font-weight:700; color:#d29922;">{score_actuel:.0%}</p>
+        </div>
+        <div style="padding:18px 24px; background:#161b22;">
+            <p style="margin:0 0 4px; font-size:0.75rem; color:#8b949e; text-transform:uppercase; letter-spacing:0.06em;">Après le plan · estimation</p>
+            <p style="margin:0; font-size:2rem; font-weight:700; color:#3fb950;">
+                {score_apres:.0%}
+                <span style="font-size:1rem; font-weight:500; margin-left:6px;">+{delta:.0%}</span>
+            </p>
+        </div>
+    </div>""", unsafe_allow_html=True)
+
+    # barres avant/après — on utilise components.html() pour éviter tout échappement
+    # st.markdown unsafe_allow_html peut quand même échapper les variables interpolées
+    if weak_blocs:
+        bars_html = ""
+        for nom, sc_av in sorted(weak_blocs.items(), key=lambda x: x[1]):
+            w_av = int(sc_av * 100)
+            w_ap = 65
+            # on échappe manuellement le nom pour éviter les injections HTML
+            nom_safe = nom.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            bars_html += f"""
+            <div style="margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                    <span style="font-size:13px;color:#e6edf3;">{nom_safe}</span>
+                    <span style="font-size:12px;color:#8b949e;">{w_av}%
+                        <span style="color:#484f58;">→</span>
+                        <span style="color:#3fb950;font-weight:600;">{w_ap}%</span>
+                    </span>
+                </div>
+                <div style="height:6px;background:#21262d;border-radius:3px;overflow:hidden;position:relative;">
+                    <div style="position:absolute;left:0;top:0;height:100%;background:#3fb950;opacity:0.2;width:{w_ap}%;border-radius:3px;"></div>
+                    <div style="position:absolute;left:0;top:0;height:100%;background:#f85149;width:{w_av}%;border-radius:3px;"></div>
+                </div>
+            </div>"""
+
+        components.html(f"""
+        <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;
+                    padding:14px 18px;font-family:'Inter',sans-serif;">
+            <p style="margin:0 0 12px;font-size:11px;color:#484f58;
+                       text-transform:uppercase;letter-spacing:0.06em;">
+                Progression estimée si le plan est suivi
+            </p>
+            {bars_html}
+        </div>""", height=60 + len(weak_blocs) * 52)
+
+    # ── Colonnes plan + bio ───────────────────────────────────────────────
     col_plan, col_bio = st.columns([3, 2])
 
     with col_plan:
         st.markdown("#### Plan de progression personnalisé")
 
         if weak_blocs:
-            with st.spinner("Generation du plan..."):
-                # compétences individuelles les plus faibles pour un plan concret
+            # clé de session pour forcer la régénération (purge cache)
+            regen_key = f"regen_plan_{job_sel['titre']}"
+            force_regen = st.session_state.get(regen_key, False)
+
+            with st.spinner("Génération du plan..."):
                 comps_a_dev = []
                 for b in job_sel['blocs']:
                     if b['score'] < 0.6:
@@ -664,7 +783,6 @@ if st.session_state.show_results and st.session_state.results_data:
                         ], key=lambda x: x[1])[:3]
                         comps_a_dev.extend([t for t, _ in blk_comps])
 
-                # on passe tout le profil brut + compétences spécifiques à Gemini
                 user_profile_data = {
                     "likert_levels": rd.get("likert_levels", {}),
                     "outils":        rd.get("outils", {}),
@@ -672,28 +790,345 @@ if st.session_state.show_results and st.session_state.results_data:
                     "textes_libres": rd.get("textes_libres", {}),
                     "formation":     rd.get("formation", {}),
                     "comps_a_dev":   comps_a_dev[:8],
+                    "force_regen":   force_regen,  # signal pour bypasser le cache
                 }
                 learning_path = generate_learning_path(
                     weak_blocs, strong_blocs, job_sel['titre'], user_profile_data
                 )
-            st.markdown(learning_path)
+
+            # Auto-purge cache si la réponse contient du HTML structurel résiduel
+            # (signe d'un ancien cache corrompu) puis relance automatiquement
+            import re as _re
+            if _re.search(r'<div\s+style=|<p\s+style=', learning_path):
+                import pathlib
+                _cache_dir = pathlib.Path("cache")
+                if _cache_dir.exists():
+                    for _cf in _cache_dir.glob("learning_path*.json"):
+                        try: _cf.unlink()
+                        except: pass
+                # relance sans cache
+                user_profile_data["force_regen"] = True
+                learning_path = generate_learning_path(
+                    weak_blocs, strong_blocs, job_sel['titre'], user_profile_data
+                )
+
+            # ── Garde-fou troncature ──────────────────────────────────────
+            import re as _re
+
+            lp_stripped = learning_path.strip()
+            _is_truncated = (
+                len(lp_stripped) > 100 and
+                lp_stripped[-1] not in '.!?*_)»"' and
+                not lp_stripped.endswith('---') and
+                not lp_stripped.endswith('```')
+            )
+            if _is_truncated:
+                st.warning("⚠️ Le plan semble incomplet. Cliquez sur **Régénérer** pour relancer.", icon=None)
+
+            # ── Nettoyage du contenu Gemini ────────────────────────────────
+            def _clean_lp(text):
+                """
+                Nettoyage agressif ligne par ligne :
+                1. Retire les lignes qui COMMENCENT par une balise HTML (<div, </div, <p, etc.)
+                2. Retire les balises HTML inline dans les lignes qui restent
+                3. Retire les lignes qui ne sont que du CSS (style="...", padding:..., etc.)
+                """
+                out = []
+                for raw in text.split('\n'):
+                    s = raw.strip()
+                    # saute les lignes qui sont purement du HTML structurel
+                    if _re.match(r'^</?[a-zA-Z][^>]*>?\s*$', s):
+                        continue
+                    # saute les lignes qui commencent par une balise ouvrante/fermante
+                    if _re.match(r'^\s*<(div|p|span|ul|li|br|h[1-6])', s, _re.IGNORECASE):
+                        # mais uniquement si la ligne ne contient pas de texte réel après
+                        text_content = _re.sub(r'<[^>]+>', '', s).strip()
+                        if not text_content or len(text_content) < 5:
+                            continue
+                    # retire les balises HTML inline dans les lignes normales
+                    line = _re.sub(r'<[^>]+>', '', raw)
+                    s2 = line.strip()
+                    # saute les lignes purement CSS résiduelle (après retrait des balises)
+                    if s2 and len(s2) < 120 \
+                       and _re.match(r'^[\w"\'#\s\-:;,.()%/]+$', s2) \
+                       and ':' in s2 \
+                       and not _re.search(r'[àâäéèêëîïôùûüçœæÀÂÉÈ]', s2) \
+                       and not _re.search(r'\b(pour|avec|dans|vous|les|des|une|est|que|qui|par|sur)\b', s2.lower()):
+                        continue
+                    if line.strip():
+                        out.append(line)
+                return '\n'.join(out)
+
+            def _clean_body(text):
+                """Retire backticks, ## résiduels, et lignes HTML parasites."""
+                text = _re.sub(r'`([^`]+)`', r'\1', text)
+                text = _re.sub(r'^#{1,4}\s+', '', text, flags=_re.MULTILINE)
+                # retire aussi les attributs style résiduels qui trainent sur leur propre ligne
+                text = _re.sub(r'^\s*style\s*=\s*["\'][^"\']*["\'][,;]?\s*$', '', text, flags=_re.MULTILINE)
+                # retire les lignes qui ne sont que des attributs HTML (padding:..., margin:...)
+                lines = []
+                for line in text.split('\n'):
+                    s = line.strip()
+                    if s and _re.match(r'^[\w-]+\s*:\s*[\w\s\-#%.,()"\']+;?\s*$', s) \
+                       and not _re.search(r'[àâäéèêëîïôùûüçœæ]', s) \
+                       and not _re.search(r'\b(pour|avec|dans|vous|les|des|une|est|que|qui|par|sur)\b', s.lower()):
+                        continue
+                    lines.append(line)
+                # Sécurité finale : supprimer TOUTES les balises HTML résiduelles
+                # (Gemini en génère parfois malgré l'instruction explicite)
+                clean = '\n'.join(lines)
+                clean = _re.sub(r'<[^>]+>', '', clean)
+                return clean.strip()
+
+            def _parse_sections(text):
+                """Normalise formats ## et 'Étape N\\nTitre' → liste de sections."""
+                text = _clean_lp(text)
+                lines = text.split('\n')
+                unified = []
+                i = 0
+                while i < len(lines):
+                    l = lines[i].strip()
+                    if _re.match(r'^[ÉE]tape\s+\d+\s*$', l, _re.IGNORECASE):
+                        j = i + 1
+                        while j < len(lines) and not lines[j].strip():
+                            j += 1
+                        if j < len(lines) and not _re.match(r'^#{1,4}\s', lines[j].strip()):
+                            unified.append(f"## {lines[j].strip()}")
+                            i = j + 1
+                            continue
+                    unified.append(lines[i])
+                    i += 1
+                text_unified = '\n'.join(unified)
+
+                sections = []
+                parts = _re.split(r'\n(?=#{1,4}\s)', text_unified)
+                for part in parts:
+                    part = part.strip()
+                    if not part:
+                        continue
+                    m = _re.match(r'^#{1,4}\s+(.+)', part)
+                    if m:
+                        # nettoie le titre : retire les ## résiduels et espaces
+                        titre = _re.sub(r'^#+\s*', '', m.group(1)).strip()
+                        body  = _clean_body(part[m.end():].strip())
+                        sections.append({'titre': titre, 'body': body, 'is_section': True})
+                    else:
+                        body = _clean_body(part.strip())
+                        if body:
+                            sections.append({'titre': '', 'body': body, 'is_section': False})
+                return sections
+
+            sections = _parse_sections(learning_path)
+            _colors  = ["#f85149", "#d29922", "#58a6ff", "#3fb950", "#a371f7"]
+            step_n   = 0
+
+            for sec in sections:
+                if not sec['is_section']:
+                    # intro / conclusion — st.markdown NATIF obligatoire
+                    # (pas de <div> HTML sinon **gras** s'affiche en brut)
+                    st.markdown(sec['body'])
+                    continue
+
+                titre = sec['titre']
+                body  = sec['body']
+
+                # saute les titres-chapeau sans corps
+                if not body.strip():
+                    continue
+
+                col_s = _colors[step_n % len(_colors)]
+
+                # badge score si le titre correspond à un bloc faible
+                badge = ""
+                for nom_b, sc_b in weak_blocs.items():
+                    if nom_b.lower()[:10] in titre.lower() or titre.lower()[:10] in nom_b.lower():
+                        lbl   = "À développer" if sc_b < 0.45 else "En cours"
+                        badge = (f'<span style="font-size:0.68rem;padding:2px 8px;'
+                                 f'background:{col_s}22;color:{col_s};border-radius:4px;'
+                                 f'white-space:nowrap;font-family:Inter,sans-serif;">'
+                                 f'{sc_b:.0%} · {lbl}</span>')
+                        break
+
+                titre_safe = titre.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+
+                # Convertit le markdown Gemini en HTML propre pour st.markdown unsafe
+                # Le body vient de _clean_body() — backticks et ## déjà supprimés
+                def _md_to_html_inline(text):
+                    import re as _r
+                    text = _r.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+                    text = _r.sub(r'\*(.+?)\*',     r'<em>\1</em>', text)
+                    text = _r.sub(r'`([^`]+)`',     r'\1', text)
+                    lines_in, lines_out, in_ul = text.split('\n'), [], False
+                    for line in lines_in:
+                        s = line.strip()
+                        if _r.match(r'^[-*]\s+', s):
+                            item = _r.sub(r'^[-*]\s+', '', s)
+                            if not in_ul:
+                                lines_out.append('<ul style="margin:6px 0 8px 20px;padding:0;color:#c9d1d9;">')
+                                in_ul = True
+                            lines_out.append(f'<li style="margin:4px 0;line-height:1.65;font-size:13px;">{item}</li>')
+                        else:
+                            if in_ul:
+                                lines_out.append('</ul>')
+                                in_ul = False
+                            if s:
+                                # Strip tout HTML résiduel avant d'injecter dans le <p>
+                                # évite qu'un </div> brise la structure de la card
+                                s_safe = _r.sub(r'<(?!/?(strong|em)\b)[^>]+>', '', s).strip()
+                                if s_safe:
+                                    lines_out.append(f'<p style="margin:5px 0;line-height:1.7;font-size:13px;color:#c9d1d9;">{s_safe}</p>')
+                    if in_ul:
+                        lines_out.append('</ul>')
+                    return '\n'.join(lines_out)
+
+                body_html = _md_to_html_inline(body)
+
+                # Card complète — HTML compact SANS ligne blanche pour éviter la rupture
+                # du bloc HTML CommonMark (une ligne vide termine le bloc → le reste s'affiche en texte).
+                # {badge} peut être "" → on l'insère inline sans retour à la ligne dédié.
+                card_html = (
+                    f'<div style="border:1px solid #21262d;border-left:4px solid {col_s};'
+                    f'border-radius:10px;margin-top:16px;overflow:visible;'
+                    f"font-family:'Inter','Helvetica Neue',sans-serif;\">"
+                    f'<div style="background:#161b22;padding:10px 14px;border-bottom:1px solid #21262d;'
+                    f'display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-radius:10px 10px 0 0;">'
+                    f'<span style="font-size:10px;font-weight:600;color:{col_s};'
+                    f'text-transform:uppercase;letter-spacing:0.08em;">Étape {step_n+1}</span>'
+                    f'<span style="font-size:14px;font-weight:600;color:#e6edf3;">{titre_safe}</span>'
+                    f'{badge}'
+                    f'</div>'
+                    f'<div style="padding:12px 16px 16px;background:#0d1117;border-radius:0 0 10px 10px;">'
+                    f'{body_html}'
+                    f'</div>'
+                    f'</div>'
+                )
+                st.markdown(card_html, unsafe_allow_html=True)
+
+                step_n += 1
+
+            # bouton régénérer discret — en bas du plan, pas en haut
+            st.markdown('<div style="margin-top:8px;"></div>', unsafe_allow_html=True)
+            col_regen, _ = st.columns([1, 3])
+            with col_regen:
+                if st.button("↺ Régénérer", key=f"btn_regen_{job_sel['titre']}",
+                             use_container_width=True):
+                    st.session_state[regen_key] = True
+                    import pathlib
+                    _cache_dir = pathlib.Path("cache")
+                    if _cache_dir.exists():
+                        for _cf in _cache_dir.glob("learning_path*.json"):
+                            try: _cf.unlink()
+                            except: pass
+                    st.rerun()
+
+            # roadmap si ≥ 2 blocs faibles — components.html pour rendu garanti
+            if len(weak_blocs) >= 2:
+                etapes = list(weak_blocs.keys()) + ["Objectif atteint"]
+                tc     = ["#f85149", "#d29922", "#58a6ff", "#3fb950", "#a371f7"]
+                dots_h = ""
+                for mi, mt in enumerate(etapes[:5]):
+                    mc    = tc[mi % len(tc)]
+                    label = f"M{mi+1}" if mi < len(etapes) - 1 else "✓"
+                    short = (mt[:18] + "…") if len(mt) > 18 else mt
+                    # échappement des noms pour sécurité HTML
+                    short = short.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+                    dots_h += f"""
+                    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1;">
+                        <div style="width:26px;height:26px;border-radius:50%;background:{mc}22;border:2px solid {mc};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:{mc};flex-shrink:0;">{label}</div>
+                        <p style="margin:0;font-size:11px;font-weight:500;text-align:center;color:#c9d1d9;line-height:1.3;">{short}</p>
+                    </div>"""
+                components.html(f"""
+                <div style="background:#161b22;border:1px solid #21262d;border-radius:12px;padding:16px;font-family:'Inter',sans-serif;">
+                    <p style="margin:0 0 12px;font-size:11px;color:#8b949e;text-transform:uppercase;letter-spacing:0.06em;">Roadmap estimée</p>
+                    <div style="display:flex;align-items:flex-start;position:relative;">
+                        <div style="position:absolute;top:12px;left:13px;right:13px;height:2px;background:#21262d;z-index:0;"></div>
+                        {dots_h}
+                    </div>
+                </div>""", height=100)
+
         else:
-            st.success("Excellent ! Vous maitrisez deja tous les blocs requis pour ce metier.")
+            st.success("Excellent ! Vous maîtrisez déjà tous les blocs requis pour ce métier.")
 
     with col_bio:
         st.markdown("#### Bio professionnelle")
-        if not strong_blocs:
-            best = max(job_sel['blocs'], key=lambda b: b['score'])
-            strong_blocs = {best['nom']: best['score']}
-        with st.spinner("Redaction..."):
-            bio = generate_professional_bio(
-                strong_blocs, job_sel['titre'],
-                {"projet_tech": rd.get("projet_tech", ""), "objectif": rd.get("objectif", "")}
-            )
-        st.info(bio)
-        st.download_button("Télécharger ma bio", bio, file_name="bio_aisca.txt",
-                           mime="text/plain", use_container_width=True)
+        try:
+            with st.spinner("Rédaction..."):
+                bio = generate_professional_bio(
+                    strong_blocs, job_sel['titre'],
+                    {"projet_tech": rd.get("projet_tech", ""), "objectif": rd.get("objectif", "")}
+                )
 
+            # nettoyage défensif de la bio
+            bio_clean = _re.sub(r'<[^>]+>', '', bio).strip() if 'bio' in dir() else bio
+
+            # tags outils
+            outils_flat = [o for lst in rd.get("outils", {}).values() for o in lst if lst]
+            tags_h = "".join(
+                f'<span style="font-size:0.73rem;padding:2px 8px;border-radius:4px;'
+                f'background:#21262d;color:#8b949e;margin:2px;">{o}</span>'
+                for o in outils_flat[:8]
+            )
+
+            form_info  = rd.get("formation", {})
+            etudes_s   = form_info.get("Niveau d'etudes", "").replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+            exp_s      = form_info.get("Experience professionnelle", "").replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+            titre_s    = job_sel['titre'].replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
+
+            # header card bio + tags outils en components.html — rendu garanti
+            tags_items = "".join(
+                f'<span style="font-size:11px;padding:3px 10px;border-radius:20px;'
+                f'background:#21262d;color:#8b949e;margin:2px;display:inline-block;">'
+                f'{o.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")}</span>'
+                for o in outils_flat[:8]
+            )
+            tags_section = (
+                f'<div style="padding:10px 16px 12px;border-top:1px solid #21262d;'
+                f'display:flex;flex-wrap:wrap;gap:4px;">{tags_items}</div>'
+                if tags_items else ""
+            )
+            # hauteur : 62px header + 44px tags (2 lignes max) si tags, sinon 62
+            nb_tags   = len(outils_flat[:8])
+            tags_h_px = (46 if nb_tags <= 4 else 70) if tags_items else 0
+            bio_card_h = 62 + tags_h_px
+
+            components.html(f"""
+            <div style="border:1px solid #21262d;border-radius:12px;overflow:hidden;
+                        font-family:'Inter','Helvetica Neue',sans-serif;">
+                <div style="padding:12px 16px;background:#161b22;border-bottom:1px solid #21262d;">
+                    <p style="margin:0;font-size:14px;font-weight:600;color:#e6edf3;">Bio générée</p>
+                    <p style="margin:4px 0 0;font-size:12px;color:#8b949e;">{titre_s} · {etudes_s} · {exp_s}</p>
+                </div>
+                {tags_section}
+            </div>""", height=bio_card_h)
+
+            # corps bio : st.markdown natif — jamais injecté dans du HTML
+            st.markdown(bio_clean)
+
+        except Exception:
+            bio_clean = ""
+            st.markdown("""
+            <div style="border-left:4px solid #d29922;border-radius:0 12px 12px 0;
+                        padding:14px 16px;background:#161b22;">
+                <p style="margin:0 0 4px;font-size:0.82rem;font-weight:600;color:#d29922;">
+                    Bio temporairement indisponible
+                </p>
+                <p style="margin:0;font-size:0.82rem;color:#8b949e;">
+                    Quota Gemini atteint ou clé API manquante.<br>
+                    Vérifiez votre fichier <code>.env</code> et réessayez.
+                </p>
+            </div>""", unsafe_allow_html=True)
+            bio_clean = ""
+
+        if bio_clean:
+            st.download_button(
+                "Télécharger ma bio",
+                bio_clean,
+                file_name=f"bio_aisca_{job_sel['titre'].replace(' ', '_')}.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
+
+    # ── Tableau récap ─────────────────────────────────────────────────────
     st.markdown("---")
     st.markdown(f"**Tableau récapitulatif** — blocs requis pour : *{job_sel['titre']}*")
     df_scores = pd.DataFrame([

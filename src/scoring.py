@@ -16,7 +16,7 @@ from sentence_transformers import SentenceTransformer, util
 def get_models() -> SentenceTransformer:
     # Chargement unique au démarrage — HuggingFace met le modèle en cache local
     # après le premier téléchargement, donc pas de latence aux lancements suivants.
-    bi_model = SentenceTransformer('S13v3n-2/scoring-camembert-v2')
+    bi_model = SentenceTransformer('S13v3n-2/scoring-camembert-v5')
     return bi_model
 
 
@@ -34,6 +34,7 @@ def load_and_index_data(json_path: str) -> Tuple[Dict, Dict, List[str], np.ndarr
             cid = comp['id']
             comp_index[cid] = {
                 'texte':    comp['texte'],
+                'niveau':   comp['niveau'],   # 'technique' | 'transversal' | 'interet'
                 'bloc_id':  bloc['id'],
                 'bloc_nom': bloc['nom']
             }
@@ -286,14 +287,17 @@ def recommend_jobs(
     #    pour obtenir un score représentatif par bloc.
     #
     # 2. Pour chaque métier, on calcule une moyenne pondérée par rang des blocs requis.
-    #    Le premier bloc (rang 0) pèse 4x plus que le troisième — c'est lui qui
-    #    définit le coeur du métier. La division par total_weight normalise les scores
-    #    pour qu'un métier avec 4 blocs requis ne soit pas avantagé face à un avec 2.
+    #    L'ordre dans blocs_requis encode la priorité : rang 0 = bloc cœur du métier.
+    #    On utilise une décroissance exponentielle 1/2^rang — robuste quel que soit
+    #    le nombre de blocs et insensible à l'ordre arbitraire dans le JSON.
+    #
+    #    Distribution effective :
+    #      2 blocs → [67%, 33%]
+    #      3 blocs → [57%, 29%, 14%]
+    #      4 blocs → [53%, 27%, 13%, 7%]
     #
     # 3. Un bonus basé sur les compétences-clés du métier affine le classement
     #    entre métiers qui partagent exactement les mêmes blocs. Il pèse 30% du score final.
-
-    RANK_WEIGHTS = [4.0, 2.0, 1.0, 0.5]
 
     comp_to_bloc = {}
     bloc_index   = {}
@@ -320,12 +324,13 @@ def recommend_jobs(
         if not bloc_ids:
             continue
 
-        total_weight = 0.0
-        weighted_sum = 0.0
-        for rank, bid in enumerate(bloc_ids):
-            weight        = RANK_WEIGHTS[rank] if rank < len(RANK_WEIGHTS) else 0.25
-            weighted_sum += bloc_scores.get(bid, 0.0) * weight
-            total_weight += weight
+        # Pondération exponentielle 1/2^rang — se normalise automatiquement
+        weights      = [1.0 / (2 ** rank) for rank in range(len(bloc_ids))]
+        total_weight = sum(weights)
+        weighted_sum = sum(
+            bloc_scores.get(bid, 0.0) * w
+            for bid, w in zip(bloc_ids, weights)
+        )
         base_score = weighted_sum / total_weight if total_weight > 0 else 0.0
 
         cles  = job.get('competences_cles', [])
@@ -336,11 +341,14 @@ def recommend_jobs(
         job_blocs = [
             {'nom': bloc_index[bid]['nom'], 'score': bloc_scores.get(bid, 0.0)}
             for bid in bloc_ids
+            if bid in bloc_index
         ]
 
         recommendations.append({
             'titre':       job['titre'],
             'description': job.get('description', ''),
+            'filiere':     job.get('filiere', ''),
+            'secteurs':    job.get('secteurs', []),
             'score':       job_score,
             'blocs':       job_blocs
         })

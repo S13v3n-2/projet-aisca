@@ -1,6 +1,88 @@
 {
   "blocs": [
     {
+      "id": "B00",
+      "nom": "Profil transversal",
+      "description": "Traits cognitifs, comportementaux et centres d'intérêt partagés entre plusieurs domaines",
+      "competences": [
+        {
+          "id": "P001",
+          "texte": "Faire preuve de rigueur et de précision dans son travail",
+          "niveau": "transversal"
+        },
+        {
+          "id": "P002",
+          "texte": "Avoir un esprit analytique et logique pour résoudre des problèmes complexes",
+          "niveau": "transversal"
+        },
+        {
+          "id": "P003",
+          "texte": "Apprécier travailler avec les chiffres et les données quantitatives",
+          "niveau": "interet"
+        },
+        {
+          "id": "P004",
+          "texte": "Être curieux et pratiquer une veille active dans son domaine",
+          "niveau": "interet"
+        },
+        {
+          "id": "P005",
+          "texte": "Faire preuve de créativité dans ses approches et productions",
+          "niveau": "transversal"
+        },
+        {
+          "id": "P006",
+          "texte": "Développer son empathie et son sens du contact humain",
+          "niveau": "transversal"
+        },
+        {
+          "id": "P007",
+          "texte": "Avoir un esprit de leadership et d'initiative entrepreneuriale",
+          "niveau": "transversal"
+        },
+        {
+          "id": "P008",
+          "texte": "Aimer débattre et argumenter de manière structurée",
+          "niveau": "interet"
+        },
+        {
+          "id": "P009",
+          "texte": "S'intéresser à l'actualité (politique, juridique, tech, médias)",
+          "niveau": "interet"
+        },
+        {
+          "id": "P010",
+          "texte": "Posséder une aisance à l'oral et une qualité rédactionnelle",
+          "niveau": "transversal"
+        },
+        {
+          "id": "P011",
+          "texte": "Avoir le sens du commerce et de la persuasion",
+          "niveau": "transversal"
+        },
+        {
+          "id": "P012",
+          "texte": "Avoir une passion pour la technologie et l'innovation",
+          "niveau": "interet"
+        },
+        {
+          "id": "P013",
+          "texte": "S'intéresser aux arts visuels, au design et à l'esthétique",
+          "niveau": "interet"
+        },
+        {
+          "id": "P014",
+          "texte": "Avoir un esprit pratique et une curiosité pour les objets techniques",
+          "niveau": "interet"
+        },
+        {
+          "id": "P015",
+          "texte": "Posséder de solides bases en mathématiques (algèbre, stats, calcul)",
+          "niveau": "transversal"
+        }
+      ]
+    },
+    {
       "id": "B01",
       "nom": "Juridique",
       "description": "Compétences en droit, conformité et réglementation",
@@ -48,22 +130,12 @@
         {
           "id": "C009",
           "texte": "Aimer débattre et argumenter de manière structurée",
-          "niveau": "general"
-        },
-        {
-          "id": "C010",
-          "texte": "Être rigoureux et attentif aux moindres détails",
-          "niveau": "general"
-        },
-        {
-          "id": "C011",
-          "texte": "Avoir un esprit d'analyse pour décortiquer des problèmes complexes",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C012",
           "texte": "S'intéresser à l'actualité politique et juridique",
-          "niveau": "general"
+          "niveau": "interet"
         }
       ]
     },
@@ -113,24 +185,9 @@
           "niveau": "technique"
         },
         {
-          "id": "C021",
-          "texte": "Avoir un esprit de leadership et savoir motiver une équipe",
-          "niveau": "general"
-        },
-        {
-          "id": "C022",
-          "texte": "Faire preuve d'esprit entrepreneurial et d'initiative",
-          "niveau": "general"
-        },
-        {
-          "id": "C023",
-          "texte": "Résoudre des problèmes complexes avec créativité",
-          "niveau": "general"
-        },
-        {
           "id": "C024",
           "texte": "Avoir une vision globale et savoir anticiper les tendances",
-          "niveau": "general"
+          "niveau": "transversal"
         }
       ]
     },
@@ -182,22 +239,12 @@
         {
           "id": "C033",
           "texte": "Avoir un talent de persuasion et savoir convaincre",
-          "niveau": "general"
-        },
-        {
-          "id": "C034",
-          "texte": "Faire preuve de créativité dans les approches commerciales",
-          "niveau": "general"
-        },
-        {
-          "id": "C035",
-          "texte": "Développer son empathie pour comprendre les besoins clients",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C036",
           "texte": "Avoir le sens du commerce et l'aisance relationnelle",
-          "niveau": "general"
+          "niveau": "transversal"
         }
       ]
     },
@@ -245,26 +292,6 @@
           "id": "C044",
           "texte": "Gérer la trésorerie et optimiser les flux financiers",
           "niveau": "technique"
-        },
-        {
-          "id": "C045",
-          "texte": "Avoir une grande rigueur dans le traitement des chiffres",
-          "niveau": "general"
-        },
-        {
-          "id": "C046",
-          "texte": "Développer sa logique et son raisonnement analytique",
-          "niveau": "general"
-        },
-        {
-          "id": "C047",
-          "texte": "Aimer travailler avec les chiffres et les données quantitatives",
-          "niveau": "general"
-        },
-        {
-          "id": "C048",
-          "texte": "Être organisé et précis dans son travail quotidien",
-          "niveau": "general"
         }
       ]
     },
@@ -316,22 +343,17 @@
         {
           "id": "C057",
           "texte": "Avoir une grande aisance à l'oral et en présentation publique",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C058",
           "texte": "Posséder une excellente qualité rédactionnelle et syntaxe",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C059",
           "texte": "Faire preuve de curiosité pour l'actualité et les médias",
-          "niveau": "general"
-        },
-        {
-          "id": "C060",
-          "texte": "Avoir le sens du contact et de l'empathie dans les relations",
-          "niveau": "general"
+          "niveau": "interet"
         }
       ]
     },
@@ -381,24 +403,19 @@
           "niveau": "technique"
         },
         {
-          "id": "C069",
-          "texte": "Faire preuve de créativité et d'imagination dans ses créations",
-          "niveau": "general"
-        },
-        {
           "id": "C070",
           "texte": "Développer son sens esthétique et son œil artistique",
-          "niveau": "general"
+          "niveau": "interet"
         },
         {
           "id": "C071",
           "texte": "Pratiquer le dessin ou d'autres formes d'art visuel",
-          "niveau": "general"
+          "niveau": "interet"
         },
         {
           "id": "C072",
           "texte": "S'intéresser aux arts visuels, expositions et design",
-          "niveau": "general"
+          "niveau": "interet"
         }
       ]
     },
@@ -450,22 +467,12 @@
         {
           "id": "C081",
           "texte": "Posséder une forte culture digitale et connaître les plateformes",
-          "niveau": "general"
-        },
-        {
-          "id": "C082",
-          "texte": "Faire preuve de créativité numérique dans la production de contenu",
-          "niveau": "general"
-        },
-        {
-          "id": "C083",
-          "texte": "Être curieux des nouvelles tendances et innovations digitales",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C084",
           "texte": "Avoir une présence en ligne active et authentique",
-          "niveau": "general"
+          "niveau": "interet"
         }
       ]
     },
@@ -512,27 +519,7 @@
         {
           "id": "C092",
           "texte": "Interpréter les résultats statistiques et communiquer les insights",
-          "niveau": "technique"
-        },
-        {
-          "id": "C093",
-          "texte": "Avoir une logique et un raisonnement analytique développés",
-          "niveau": "general"
-        },
-        {
-          "id": "C094",
-          "texte": "Faire preuve de curiosité scientifique et investigatrice",
-          "niveau": "general"
-        },
-        {
-          "id": "C095",
-          "texte": "Aimer travailler avec les chiffres et les données",
-          "niveau": "general"
-        },
-        {
-          "id": "C096",
-          "texte": "Résoudre des énigmes logiques et des problèmes complexes",
-          "niveau": "general"
+          "niveau": "transversal"
         }
       ]
     },
@@ -584,22 +571,22 @@
         {
           "id": "C105",
           "texte": "Posséder de solides bases en mathématiques avancées (algèbre, calcul)",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C106",
           "texte": "Maîtriser l'algorithmique et la complexité computationnelle",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C107",
           "texte": "Être passionné par l'innovation technologique et l'IA",
-          "niveau": "general"
+          "niveau": "interet"
         },
         {
           "id": "C108",
           "texte": "Avoir un esprit de recherche et d'expérimentation scientifique",
-          "niveau": "general"
+          "niveau": "interet"
         }
       ]
     },
@@ -651,22 +638,17 @@
         {
           "id": "C117",
           "texte": "Développer sa logique de programmation et sa pensée algorithmique",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C118",
           "texte": "Avoir de la patience pour résoudre des bugs et déboguer du code",
-          "niveau": "general"
+          "niveau": "interet"
         },
         {
           "id": "C119",
           "texte": "Aimer construire des systèmes et voir ses créations fonctionner",
-          "niveau": "general"
-        },
-        {
-          "id": "C120",
-          "texte": "Posséder un esprit logique et méthodique dans le travail",
-          "niveau": "general"
+          "niveau": "interet"
         }
       ]
     },
@@ -718,22 +700,22 @@
         {
           "id": "C129",
           "texte": "S'intéresser à la physique et ses applications pratiques",
-          "niveau": "general"
+          "niveau": "interet"
         },
         {
           "id": "C130",
           "texte": "Comprendre la mécanique et les principes d'ingénierie",
-          "niveau": "general"
+          "niveau": "transversal"
         },
         {
           "id": "C131",
           "texte": "Avoir une curiosité technique pour comprendre le fonctionnement des objets",
-          "niveau": "general"
+          "niveau": "interet"
         },
         {
           "id": "C132",
           "texte": "Posséder un esprit pratique et aimer les travaux manuels techniques",
-          "niveau": "general"
+          "niveau": "interet"
         }
       ]
     }
@@ -743,6 +725,12 @@
       "id": "M01",
       "titre": "Avocat d'affaires",
       "description": "Conseille les entreprises sur les aspects juridiques stratégiques et représente en contentieux commercial",
+      "filiere": "droit",
+      "secteurs": [
+        "juridique",
+        "conseil",
+        "finance"
+      ],
       "blocs_requis": [
         "B01",
         "B02",
@@ -753,15 +741,21 @@
         "C002",
         "C003",
         "C007",
-        "C009",
+        "P008",
         "C015",
-        "C057"
+        "P010"
       ]
     },
     {
       "id": "M02",
       "titre": "Juriste d'entreprise",
       "description": "Assure la sécurité juridique des opérations commerciales, contractuelles et sociales",
+      "filiere": "droit",
+      "secteurs": [
+        "juridique",
+        "entreprise",
+        "RH"
+      ],
       "blocs_requis": [
         "B01",
         "B02",
@@ -773,7 +767,7 @@
         "C004",
         "C005",
         "C006",
-        "C010",
+        "P001",
         "C019"
       ]
     },
@@ -781,6 +775,12 @@
       "id": "M03",
       "titre": "Notaire",
       "description": "Authentifie les actes juridiques et conseille en gestion patrimoniale et immobilière",
+      "filiere": "droit",
+      "secteurs": [
+        "juridique",
+        "immobilier",
+        "patrimoine"
+      ],
       "blocs_requis": [
         "B01",
         "B04",
@@ -792,14 +792,20 @@
         "C008",
         "C037",
         "C040",
-        "C010",
-        "C057"
+        "P001",
+        "P010"
       ]
     },
     {
       "id": "M04",
       "titre": "Consultant en conformité RGPD",
       "description": "Assure la conformité des données personnelles et des systèmes informatiques aux réglementations",
+      "filiere": "tech",
+      "secteurs": [
+        "juridique",
+        "tech",
+        "data"
+      ],
       "blocs_requis": [
         "B01",
         "B10",
@@ -811,8 +817,8 @@
         "C006",
         "C116",
         "C111",
-        "C010",
-        "C011",
+        "P001",
+        "P002",
         "C016"
       ]
     },
@@ -820,6 +826,12 @@
       "id": "M05",
       "titre": "Responsable affaires réglementaires",
       "description": "Veille au respect des réglementations dans les secteurs hautement régulés (pharma, finance, énergie)",
+      "filiere": "droit",
+      "secteurs": [
+        "juridique",
+        "conseil",
+        "industrie"
+      ],
       "blocs_requis": [
         "B01",
         "B02",
@@ -831,7 +843,7 @@
         "C007",
         "C015",
         "C016",
-        "C012",
+        "P009",
         "C091"
       ]
     },
@@ -839,6 +851,12 @@
       "id": "M06",
       "titre": "Consultant en stratégie",
       "description": "Accompagne les directions générales dans leurs décisions stratégiques et transformations organisationnelles",
+      "filiere": "business",
+      "secteurs": [
+        "conseil",
+        "stratégie",
+        "management"
+      ],
       "blocs_requis": [
         "B02",
         "B04",
@@ -849,8 +867,8 @@
         "C015",
         "C017",
         "C037",
-        "C021",
-        "C024",
+        "P007",
+        "P002",
         "C091"
       ]
     },
@@ -858,6 +876,12 @@
       "id": "M07",
       "titre": "Chef de produit",
       "description": "Pilote le développement et le lancement de produits du concept à la commercialisation",
+      "filiere": "business",
+      "secteurs": [
+        "marketing",
+        "produit",
+        "tech"
+      ],
       "blocs_requis": [
         "B02",
         "B03",
@@ -869,8 +893,8 @@
         "C016",
         "C026",
         "C029",
-        "C021",
-        "C023",
+        "P007",
+        "P005",
         "C078"
       ]
     },
@@ -878,6 +902,12 @@
       "id": "M08",
       "titre": "Responsable développement commercial",
       "description": "Développe le portefeuille clients et pilote la croissance du chiffre d'affaires",
+      "filiere": "business",
+      "secteurs": [
+        "commercial",
+        "conseil",
+        "B2B"
+      ],
       "blocs_requis": [
         "B03",
         "B02",
@@ -889,14 +919,20 @@
         "C028",
         "C031",
         "C032",
-        "C033",
-        "C057"
+        "P011",
+        "P010"
       ]
     },
     {
       "id": "M09",
       "titre": "Business Analyst",
       "description": "Analyse les données pour éclairer les décisions stratégiques et opérationnelles",
+      "filiere": "data",
+      "secteurs": [
+        "conseil",
+        "finance",
+        "tech"
+      ],
       "blocs_requis": [
         "B08",
         "B02",
@@ -909,14 +945,19 @@
         "C041",
         "C085",
         "C091",
-        "C093",
-        "C046"
+        "P002"
       ]
     },
     {
       "id": "M10",
       "titre": "Chef de projet digital",
       "description": "Coordonne et pilote les projets digitaux en interface entre métiers et équipes techniques",
+      "filiere": "tech",
+      "secteurs": [
+        "digital",
+        "agence",
+        "média"
+      ],
       "blocs_requis": [
         "B02",
         "B07",
@@ -927,7 +968,7 @@
         "C020",
         "C073",
         "C078",
-        "C021",
+        "P007",
         "C081",
         "C114"
       ]
@@ -936,6 +977,12 @@
       "id": "M11",
       "titre": "Responsable marketing",
       "description": "Définit et pilote la stratégie marketing multicanal de l'entreprise",
+      "filiere": "marketing",
+      "secteurs": [
+        "marketing",
+        "e-commerce",
+        "FMCG"
+      ],
       "blocs_requis": [
         "B03",
         "B07",
@@ -948,7 +995,7 @@
         "C029",
         "C073",
         "C078",
-        "C034",
+        "P005",
         "C091"
       ]
     },
@@ -956,6 +1003,12 @@
       "id": "M12",
       "titre": "Account Manager",
       "description": "Gère la relation client stratégique et développe les comptes clés",
+      "filiere": "commercial",
+      "secteurs": [
+        "commercial",
+        "B2B",
+        "SaaS"
+      ],
       "blocs_requis": [
         "B05",
         "B03",
@@ -966,8 +1019,8 @@
         "C031",
         "C032",
         "C050",
-        "C035",
-        "C036",
+        "P006",
+        "P011",
         "C015"
       ]
     },
@@ -975,6 +1028,12 @@
       "id": "M13",
       "titre": "Analyste financier",
       "description": "Évalue la santé financière des entreprises et conseille sur les investissements",
+      "filiere": "finance",
+      "secteurs": [
+        "finance",
+        "banque",
+        "investissement"
+      ],
       "blocs_requis": [
         "B04",
         "B08",
@@ -986,7 +1045,7 @@
         "C041",
         "C085",
         "C087",
-        "C046",
+        "P002",
         "C013"
       ]
     },
@@ -994,6 +1053,12 @@
       "id": "M14",
       "titre": "Contrôleur de gestion",
       "description": "Pilote la performance financière opérationnelle et aide à la prise de décision",
+      "filiere": "finance",
+      "secteurs": [
+        "finance",
+        "industrie",
+        "conseil"
+      ],
       "blocs_requis": [
         "B04",
         "B08",
@@ -1006,13 +1071,19 @@
         "C043",
         "C085",
         "C090",
-        "C045"
+        "P001"
       ]
     },
     {
       "id": "M15",
       "titre": "Chargé d'études marketing",
       "description": "Réalise des études de marché et analyse les comportements consommateurs",
+      "filiere": "marketing",
+      "secteurs": [
+        "marketing",
+        "conseil",
+        "études"
+      ],
       "blocs_requis": [
         "B03",
         "B08",
@@ -1024,7 +1095,7 @@
         "C085",
         "C086",
         "C091",
-        "C094",
+        "P004",
         "C058"
       ]
     },
@@ -1032,6 +1103,12 @@
       "id": "M16",
       "titre": "Responsable communication",
       "description": "Définit et met en œuvre la stratégie de communication globale de l'entreprise",
+      "filiere": "communication",
+      "secteurs": [
+        "communication",
+        "média",
+        "institutionnel"
+      ],
       "blocs_requis": [
         "B05",
         "B02",
@@ -1044,7 +1121,7 @@
         "C053",
         "C061",
         "C062",
-        "C057",
+        "P010",
         "C078"
       ]
     },
@@ -1052,6 +1129,12 @@
       "id": "M17",
       "titre": "Chargé de relations publiques",
       "description": "Gère l'image de l'entreprise auprès des médias, journalistes et grand public",
+      "filiere": "communication",
+      "secteurs": [
+        "relations publiques",
+        "média",
+        "événementiel"
+      ],
       "blocs_requis": [
         "B05",
         "B06",
@@ -1064,7 +1147,7 @@
         "C055",
         "C056",
         "C015",
-        "C057",
+        "P010",
         "C063"
       ]
     },
@@ -1072,6 +1155,12 @@
       "id": "M18",
       "titre": "Community Manager",
       "description": "Anime les communautés en ligne, gère la présence sur les réseaux sociaux et engage les abonnés",
+      "filiere": "digital",
+      "secteurs": [
+        "digital",
+        "média",
+        "e-commerce"
+      ],
       "blocs_requis": [
         "B07",
         "B05",
@@ -1083,15 +1172,21 @@
         "C074",
         "C075",
         "C051",
-        "C082",
+        "P005",
         "C084",
-        "C069"
+        "P013"
       ]
     },
     {
       "id": "M19",
       "titre": "Content Manager",
       "description": "Crée et coordonne la production de contenus éditoriaux et la stratégie éditoriale multicanaux",
+      "filiere": "digital",
+      "secteurs": [
+        "digital",
+        "média",
+        "e-commerce"
+      ],
       "blocs_requis": [
         "B07",
         "B05",
@@ -1103,7 +1198,7 @@
         "C080",
         "C051",
         "C058",
-        "C082",
+        "P005",
         "C091"
       ]
     },
@@ -1111,6 +1206,12 @@
       "id": "M20",
       "titre": "Social Media Manager",
       "description": "Pilote la stratégie social media globale pour développer la notoriété et l'engagement de marque",
+      "filiere": "digital",
+      "secteurs": [
+        "digital",
+        "marketing",
+        "média"
+      ],
       "blocs_requis": [
         "B07",
         "B03",
@@ -1131,6 +1232,12 @@
       "id": "M21",
       "titre": "Influenceur / Créateur de contenu",
       "description": "Produit du contenu créatif authentique pour engager et développer une audience fidèle",
+      "filiere": "digital",
+      "secteurs": [
+        "digital",
+        "média",
+        "créativité"
+      ],
       "blocs_requis": [
         "B07",
         "B06",
@@ -1141,8 +1248,7 @@
         "C076",
         "C084",
         "C061",
-        "C069",
-        "C082",
+        "P005",
         "C051"
       ]
     },
@@ -1150,6 +1256,12 @@
       "id": "M22",
       "titre": "Graphiste",
       "description": "Conçoit des supports visuels et graphiques pour divers médias print et digital",
+      "filiere": "creation",
+      "secteurs": [
+        "design",
+        "agence",
+        "communication"
+      ],
       "blocs_requis": [
         "B06",
         "B05",
@@ -1161,8 +1273,8 @@
         "C064",
         "C066",
         "C067",
-        "C069",
-        "C070",
+        "P005",
+        "P013",
         "C074"
       ]
     },
@@ -1170,6 +1282,12 @@
       "id": "M23",
       "titre": "Directeur artistique",
       "description": "Définit l'identité visuelle stratégique et supervise l'ensemble des créations graphiques",
+      "filiere": "creation",
+      "secteurs": [
+        "design",
+        "agence",
+        "luxe"
+      ],
       "blocs_requis": [
         "B06",
         "B03",
@@ -1181,8 +1299,8 @@
         "C063",
         "C065",
         "C029",
-        "C069",
-        "C070",
+        "P005",
+        "P013",
         "C049"
       ]
     },
@@ -1190,6 +1308,12 @@
       "id": "M24",
       "titre": "UX/UI Designer",
       "description": "Conçoit l'expérience utilisateur et les interfaces digitales intuitives et accessibles",
+      "filiere": "tech",
+      "secteurs": [
+        "tech",
+        "produit",
+        "agence"
+      ],
       "blocs_requis": [
         "B06",
         "B10",
@@ -1200,7 +1324,7 @@
         "C062",
         "C064",
         "C109",
-        "C069",
+        "P005",
         "C117",
         "C081"
       ]
@@ -1209,6 +1333,12 @@
       "id": "M25",
       "titre": "Motion Designer",
       "description": "Crée des animations graphiques et contenus vidéo pour le digital et la communication",
+      "filiere": "creation",
+      "secteurs": [
+        "design",
+        "agence",
+        "média"
+      ],
       "blocs_requis": [
         "B06",
         "B07",
@@ -1219,8 +1349,7 @@
         "C064",
         "C068",
         "C074",
-        "C069",
-        "C082",
+        "P005",
         "C109"
       ]
     },
@@ -1228,6 +1357,12 @@
       "id": "M26",
       "titre": "Traffic Manager",
       "description": "Optimise les campagnes publicitaires en ligne et maximise le ROI des investissements media",
+      "filiere": "digital",
+      "secteurs": [
+        "digital",
+        "e-commerce",
+        "agence"
+      ],
       "blocs_requis": [
         "B07",
         "B08",
@@ -1240,7 +1375,7 @@
         "C079",
         "C085",
         "C086",
-        "C093",
+        "P002",
         "C030"
       ]
     },
@@ -1248,6 +1383,12 @@
       "id": "M27",
       "titre": "Consultant SEO/SEA",
       "description": "Améliore la visibilité en ligne par le référencement naturel et les campagnes payantes",
+      "filiere": "digital",
+      "secteurs": [
+        "digital",
+        "e-commerce",
+        "conseil"
+      ],
       "blocs_requis": [
         "B07",
         "B08",
@@ -1260,7 +1401,7 @@
         "C075",
         "C085",
         "C091",
-        "C083",
+        "P004",
         "C109"
       ]
     },
@@ -1268,6 +1409,12 @@
       "id": "M28",
       "titre": "Data Analyst",
       "description": "Analyse les données pour produire des insights business actionnables et des tableaux de bord",
+      "filiere": "data",
+      "secteurs": [
+        "data",
+        "finance",
+        "tech"
+      ],
       "blocs_requis": [
         "B08",
         "B04",
@@ -1280,7 +1427,7 @@
         "C087",
         "C088",
         "C091",
-        "C093",
+        "P002",
         "C041"
       ]
     },
@@ -1288,6 +1435,12 @@
       "id": "M29",
       "titre": "Data Scientist",
       "description": "Développe des modèles prédictifs et d'intelligence artificielle avancés pour des problèmes complexes",
+      "filiere": "data",
+      "secteurs": [
+        "data",
+        "IA",
+        "recherche"
+      ],
       "blocs_requis": [
         "B09",
         "B08",
@@ -1300,7 +1453,7 @@
         "C097",
         "C100",
         "C101",
-        "C105",
+        "P015",
         "C109"
       ]
     },
@@ -1308,6 +1461,12 @@
       "id": "M30",
       "titre": "Data Engineer",
       "description": "Construit et maintient les infrastructures de données robustes, scalables et fiables",
+      "filiere": "tech",
+      "secteurs": [
+        "data",
+        "tech",
+        "cloud"
+      ],
       "blocs_requis": [
         "B10",
         "B08",
@@ -1328,6 +1487,12 @@
       "id": "M31",
       "titre": "Machine Learning Engineer",
       "description": "Développe et déploie des algorithmes d'IA robustes en environnement de production industriel",
+      "filiere": "tech",
+      "secteurs": [
+        "IA",
+        "tech",
+        "industrie"
+      ],
       "blocs_requis": [
         "B10",
         "B09",
@@ -1348,6 +1513,12 @@
       "id": "M32",
       "titre": "Développeur Full Stack",
       "description": "Développe des applications web complètes frontend et backend, de l'interface à la base de données",
+      "filiere": "tech",
+      "secteurs": [
+        "tech",
+        "SaaS",
+        "startup"
+      ],
       "blocs_requis": [
         "B10",
         "B09",
@@ -1367,6 +1538,12 @@
       "id": "M33",
       "titre": "Ingénieur cybersécurité",
       "description": "Protège les systèmes informatiques contre les cyberattaques, audite les vulnérabilités et sécurise les infrastructures",
+      "filiere": "tech",
+      "secteurs": [
+        "cybersécurité",
+        "tech",
+        "défense"
+      ],
       "blocs_requis": [
         "B10",
         "B01",
@@ -1379,7 +1556,7 @@
         "C116",
         "C112",
         "C117",
-        "C120",
+        "P001",
         "C004"
       ]
     },
@@ -1387,6 +1564,12 @@
       "id": "M34",
       "titre": "Ingénieur énergies renouvelables",
       "description": "Conçoit et optimise des installations d'énergie verte, solaire, éolienne et hydraulique",
+      "filiere": "ingenierie",
+      "secteurs": [
+        "énergie",
+        "environnement",
+        "industrie"
+      ],
       "blocs_requis": [
         "B11",
         "B08",
@@ -1407,6 +1590,12 @@
       "id": "M35",
       "titre": "Ingénieur efficacité énergétique",
       "description": "Optimise la consommation énergétique des bâtiments et industries en utilisant la data",
+      "filiere": "ingenierie",
+      "secteurs": [
+        "énergie",
+        "immobilier",
+        "industrie"
+      ],
       "blocs_requis": [
         "B11",
         "B08",
@@ -1418,7 +1607,7 @@
         "C128",
         "C085",
         "C086",
-        "C093",
+        "P002",
         "C039"
       ]
     },
@@ -1426,6 +1615,12 @@
       "id": "M36",
       "titre": "Ingénieur environnement",
       "description": "Développe des solutions écologiques et durables pour réduire l'impact environnemental",
+      "filiere": "ingenierie",
+      "secteurs": [
+        "environnement",
+        "conseil",
+        "industrie"
+      ],
       "blocs_requis": [
         "B11",
         "B02",
@@ -1445,6 +1640,12 @@
       "id": "M37",
       "titre": "Ingénieur automobile",
       "description": "Conçoit des véhicules et systèmes automobiles innovants incluant l'IA embarquée et l'électrique",
+      "filiere": "ingenierie",
+      "secteurs": [
+        "automobile",
+        "industrie",
+        "IA embarquée"
+      ],
       "blocs_requis": [
         "B11",
         "B09",
@@ -1464,6 +1665,12 @@
       "id": "M38",
       "titre": "Ingénieur ferroviaire",
       "description": "Développe les systèmes, infrastructures et solutions d'automatisation ferroviaires modernes",
+      "filiere": "ingenierie",
+      "secteurs": [
+        "transport",
+        "industrie",
+        "infrastructure"
+      ],
       "blocs_requis": [
         "B11",
         "B10",
@@ -1483,6 +1690,12 @@
       "id": "M39",
       "titre": "Ingénieur aéronautique",
       "description": "Conçoit des aéronefs et systèmes aérospatiaux, analyse leurs performances avec la simulation et la data",
+      "filiere": "ingenierie",
+      "secteurs": [
+        "aéronautique",
+        "défense",
+        "industrie"
+      ],
       "blocs_requis": [
         "B11",
         "B08",
@@ -1503,6 +1716,12 @@
       "id": "M40",
       "titre": "Ingénieur systèmes embarqués",
       "description": "Développe des systèmes électroniques embarqués temps-réel pour l'industrie, l'automobile et l'IoT",
+      "filiere": "tech",
+      "secteurs": [
+        "embarqué",
+        "automobile",
+        "IoT"
+      ],
       "blocs_requis": [
         "B11",
         "B10",
