@@ -216,3 +216,6 @@ __marimo__/
 /src/scoring-camembert-v4/
 /src/scoring-camembert-v5/
 /src/scoring-camembert-v3/
+/tests/
+/src/scoring_save.py
+/src/visuel/
