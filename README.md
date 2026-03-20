@@ -57,17 +57,11 @@ streamlit run test-visualisations.py
 projet-aisca/
     data/
         referentiel.json        # referentiel competences et metiers
-        data.py                 # donnees en dur (doublon du json)
     src/
         scoring.py              # logique NLP et scoring
         genai_augmentation.py   # appels Gemini + cache
-        test-visualisations.py  # interface Streamlit principale
-        visualisations.py       # ancienne version de l'interface
-        scoring_save.py         # ancien scoring avec cross-encoder
+        visualisations.py       # interface Streamlit 
         app.py                  # vide (prevu pour Flask)
-        visuel/                 # images et assets
-    tests/
-        test_gpu.py             # test detection GPU
     .env                        # cle API (pas versionne)
     requirements.txt
 ```
