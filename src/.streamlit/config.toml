@@ -1,0 +1,10 @@
+[theme]
+# Police principale de l'app — définie ici pour éviter de devoir
+# l'injecter via CSS global sur tous les spans, ce qui casse les
+# icônes Material Symbols des expanders depuis Streamlit 1.47.
+font = "sans serif"
+base = "dark"
+backgroundColor = "#0d1117"
+secondaryBackgroundColor = "#161b22"
+textColor = "#e6edf3"
+primaryColor = "#58a6ff"

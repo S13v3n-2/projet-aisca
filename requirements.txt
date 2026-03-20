@@ -1,7 +1,24 @@
-streamlit
-sentence-transformers
-google-generativeai
-pandas
-numpy
-matplotlib
-plotly
+# --- Interface ---
+streamlit>=1.40.0
+
+# --- NLP / Modèle sémantique ---
+sentence-transformers>=5.2.0
+torch>=2.0.0
+transformers>=4.40.0
+accelerate>=0.26.0
+
+# --- Données ---
+datasets>=2.0.0
+numpy>=1.24.0
+pandas>=2.0.0
+
+# --- Visualisation ---
+plotly>=5.0.0
+matplotlib>=3.7.0
+
+# --- IA Générative ---
+google-generativeai>=0.8.0
+
+# --- Utilitaires ---
+python-dotenv>=1.0.0
+huggingface_hub>=0.23.0

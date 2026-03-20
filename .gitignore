@@ -207,3 +207,15 @@ marimo/_lsp/
 __marimo__/
 .env
 /.idea/
+/cache/
+.idea/
+/scoring-camembert-v1/
+/src/scoring-camembert-v2/
+/src/scoring-camembert-v1/
+/src/perso/
+/src/scoring-camembert-v4/
+/src/scoring-camembert-v5/
+/src/scoring-camembert-v3/
+/tests/
+/src/scoring_save.py
+/src/visuel/
